@@ -1,60 +1,92 @@
-const baseUrl ="https://api.unsplash.com/"
 
+// URL base de la API
+const baseUrl = "https://api.unsplash.com/";
+
+// 1. Función para consultar la API
 const consultarApi = async (url) => {
   try {
-    // 1. Comillas agregadas en 'GET' y en el valor de 'Authorization'
     const respuesta = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        Authorization: 'Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k'
-      }
+        Authorization: "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
+      },
     });
 
+    // Comprobamos si la respuesta es correcta
     if (!respuesta.ok) {
       throw new Error(`Error HTTP: ${respuesta.status}`);
     }
 
+    // Convertimos la respuesta a JSON
     const datos = await respuesta.json();
+
     return datos;
+
   } catch (error) {
-    console.log('Ha ocurrido un error:', error);
+    console.log("Ha ocurrido un error:", error);
     return null;
   }
 };
 
-// 2. Función asíncrona para esperar los datos
+
+// 2. Función para pintar las imágenes
 const pintarImagenes = async () => {
- 
-  
-  // Usamos await para esperar a que la API responda
+
+  // Seleccionamos el contenedor del HTML
+  const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
+
+  // Esperamos a recibir los datos de la API
   const datosRecibidos = await consultarApi(`${baseUrl}collections?page=8`);
 
-  // Validamos que haya datos antes de intentar dibujarlos
+  // Comprobamos que hemos recibido datos
   if (!datosRecibidos) {
-    gridFotosCategoria.innerHTML = '<p>No se pudieron cargar las colecciones.</p>';
+    gridFotosCategoria.innerHTML =
+      "<p>No se pudieron cargar las colecciones.</p>";
     return;
   }
 
-  // 3. Transformamos cada objeto del arreglo en una tarjeta HTML
-   const gridFotosCategoria = document.querySelector('#gridFotosCategoria');
-  const htmlColecciones = datosRecibidos.map((coleccion) => {
-    const imagenUrl = coleccion.cover_photo?.urls?.small || '';
-    const titulo = coleccion.title;
+  // Creamos un fragmento para almacenar los elementos
+  const fragment = document.createDocumentFragment();
 
-    return `
-      <div class="tarjeta-categoria">
-        <img src="${imagenUrl}" alt="${titulo}">
-        <h3>${titulo}</h3>
-      </div>
-    `;
-  }).join(''); // .join('') une todo el arreglo en un solo texto HTML sin comas
+  // Recorremos el array recibido de la API
+  datosRecibidos.forEach((imagenObj) => {
 
-  gridFotosCategoria.innerHTML = htmlColecciones;
+    // Creamos una tarjeta y recogemos el elemento devuelto
+    const contenedor = crearImagen(imagenObj);
+
+    // Añadimos la tarjeta al fragmento
+    fragment.append(contenedor);
+
+  });
+
+  // Añadimos todos los elementos al DOM
+  gridFotosCategoria.append(fragment);
 };
 
-// Ejecutamos la función
+
+// 3. Función para crear cada tarjeta de imagen
+const crearImagen = (imagen) => {
+
+  // Creamos el article
+  const contenedor = document.createElement("article");
+
+  // Creamos el título
+  const titulo = document.createElement("h4");
+  titulo.textContent = imagen.title;
+
+  // Creamos la imagen
+  const img = document.createElement("img");
+  img.src = imagen.cover_photo?.urls?.small || "";
+  img.alt = imagen.cover_photo?.alt_description || imagen.title;
+  img.title = imagen.title;
+
+  // Añadimos el título y la imagen al article
+  contenedor.append(titulo, img);
+
+  // Devolvemos el article completo
+  return contenedor;
+};
+
+
+// 4. Ejecutamos la función
 pintarImagenes();
-
-
-
-
