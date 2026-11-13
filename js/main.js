@@ -19,23 +19,14 @@ const consultarApi = async (url) => {
                     "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
             },
         });
-<<<<<<< HEAD
-=======
-
->>>>>>> 952d7ba06df27d44209997a7d20a161975e39155
         // Comprobamos si la respuesta es correcta
         if (!respuesta.ok) {
             throw new Error(`Error HTTP: ${respuesta.status}`);
         }
-<<<<<<< HEAD
-        // Convertimos la respuesta a JSON
-        const datos = await respuesta.json();
-=======
 
         // Convertimos la respuesta a JSON
         const datos = await respuesta.json();
 
->>>>>>> 952d7ba06df27d44209997a7d20a161975e39155
         return datos;
     } catch (error) {
         console.log("Ha ocurrido un error:", error);
