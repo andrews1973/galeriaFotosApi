@@ -100,3 +100,19 @@ const crearImagen = (imagen) => {
 
 // 4. Ejecutamos la función
 pintarImagenes();
+
+//busqueda
+const formulario = document.querySelector("#busqueda");
+const inputBuscar = document.querySelector("#buscar");
+formulario.addEventListener("submit", (event) => {
+    // Evitamos que el formulario recargue la página
+    event.preventDefault();
+
+    // Obtenemos el valor del input
+    const textoBuscar = inputBuscar.value.trim();
+
+    // Comprobamos que no esté vacío
+    if (textoBuscar !== "") {
+        pintarImagenes(textoBuscar);
+    }
+});
