@@ -1,10 +1,17 @@
 // URL base de la API
 const baseUrl = "https://api.unsplash.com/";
 
-const orientacion = "landscape"; // orientation=landscape, portrait, squarish
-const query = ""; // Search term
-const page = 1; // Page number to retrieve. (Optional; default: 1)
-const per_page = 10; //  	Number of items per page. (Optional; default: 10)
+//const orientacion = "landscape"; // orientation=landscape, portrait, squarish
+//const query = ""; // Search term
+//const page = 1; // Page number to retrieve. (Optional; default: 1)
+//const per_page = 10; //  	Number of items per page. (Optional; default: 10)
+
+// Naturaleza
+// https://api.unsplash.com/search/photos?query=nature&per_page=1
+// Tecnología
+// https://api.unsplash.com/search/photos?query=technology&per_page=1
+// Personas
+// https://api.unsplash.com/search/photos?query=people&per_page=1
 
 // querySelector
 const select = document.querySelector("orientacionFoto");
@@ -37,42 +44,63 @@ const consultarApi = async (url) => {
 
 // 2. Función para pintar las imágenes
 
-const pintarImagenes = async (query = "nature") => {
+const pintarImagenes = async (
+    query = "nature",
+    page = 1,
+    per_page = 10,
+    orientacion = "landscape",
+) => {
     // Seleccionamos el contenedor del HTML
     const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 
-    // Esperamos a recibir los datos de la API
-    const datosRecibidos = await consultarApi(
-        `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
-    );
+    try {
+        // Comprobamos que existe el contenedor
+        if (!gridFotosCategoria) {
+            throw new Error("No se encontró el contenedor de fotografías.");
+        }
 
-    // Comprobamos que hemos recibido datos
-    if (!datosRecibidos) {
-        gridFotosCategoria.innerHTML =
-            "<p>No se pudieron cargar las fotografías.</p>";
-        return;
+        // Esperamos a recibir los datos de la API
+        const datosRecibidos = await consultarApi(
+            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+        );
+
+        // Comprobamos que hemos recibido datos
+        if (!datosRecibidos) {
+            throw new Error("No se pudieron cargar las fotografías.");
+        }
+
+        // Obtenemos el array de fotografías
+        const fotos = datosRecibidos.results;
+
+        // Comprobamos que existen fotografías
+        if (fotos.length === 0) {
+            gridFotosCategoria.innerHTML =
+                "<p>No se encontraron fotografías.</p>";
+            return;
+        }
+
+        // Limpiamos las fotografías anteriores
+        gridFotosCategoria.innerHTML = "";
+
+        // Creamos un fragmento para almacenar los elementos
+        const fragment = document.createDocumentFragment();
+
+        // Recorremos el array de fotografías
+        fotos.forEach((imagenObj) => {
+            const contenedor = crearImagen(imagenObj);
+            fragment.append(contenedor);
+        });
+
+        // Añadimos todos los elementos al DOM
+        gridFotosCategoria.append(fragment);
+    } catch (error) {
+        console.error("Error al pintar las imágenes:", error);
+
+        if (gridFotosCategoria) {
+            gridFotosCategoria.innerHTML =
+                "<p>Ha ocurrido un error al cargar las fotografías.</p>";
+        }
     }
-
-    // Obtenemos el array de fotografías
-    const fotos = datosRecibidos.results;
-
-    // Limpiamos las fotografías anteriores
-    gridFotosCategoria.innerHTML = "";
-
-    // Creamos un fragmento para almacenar los elementos
-    const fragment = document.createDocumentFragment();
-
-    // Recorremos el array de fotografías
-    fotos.forEach((imagenObj) => {
-        // Creamos una tarjeta
-        const contenedor = crearImagen(imagenObj);
-
-        // Añadimos la tarjeta al fragmento
-        fragment.append(contenedor);
-    });
-
-    // Añadimos todos los elementos al DOM
-    gridFotosCategoria.append(fragment);
 };
 
 // 3. Función para crear cada tarjeta de imagen
