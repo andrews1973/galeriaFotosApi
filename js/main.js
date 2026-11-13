@@ -20,6 +20,39 @@ const consultarApi = async (url) => {
   }
 };
 
+// 2. Función asíncrona para esperar los datos
+const mostrarColecciones = async () => {
+ 
+  
+  // Usamos await para esperar a que la API responda
+  const datosRecibidos = await consultarApi('https://api.unsplash.com/collections?page=8');
+
+  // Validamos que haya datos antes de intentar dibujarlos
+  if (!datosRecibidos) {
+    gridFotosCategoria.innerHTML = '<p>No se pudieron cargar las colecciones.</p>';
+    return;
+  }
+
+  // 3. Transformamos cada objeto del arreglo en una tarjeta HTML
+   const gridFotosCategoria = document.querySelector('#gridFotosCategoria');
+  const htmlColecciones = datosRecibidos.map((coleccion) => {
+    const imagenUrl = coleccion.cover_photo?.urls?.small || '';
+    const titulo = coleccion.title;
+
+    return `
+      <div class="tarjeta-categoria">
+        <img src="${imagenUrl}" alt="${titulo}">
+        <h3>${titulo}</h3>
+      </div>
+    `;
+  }).join(''); // .join('') une todo el arreglo en un solo texto HTML sin comas
+
+  gridFotosCategoria.innerHTML = htmlColecciones;
+};
+
+// Ejecutamos la función
+mostrarColecciones();
+
 
 
 
