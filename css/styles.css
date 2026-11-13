@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-=======
 /* ========================================
    1. RESET Y CONFIGURACIÓN GENERAL
 ======================================== */
 
->>>>>>> 952d7ba06df27d44209997a7d20a161975e39155
 * {
     margin: 0;
     padding: 0;
@@ -18,14 +15,6 @@ body {
     padding: 1rem;
 }
 
-<<<<<<< HEAD
-.mostrar {
-    display: block;
-}
-
-.categoria{
-    display: flex;
-=======
 /* ========================================
    2. CONTENEDOR PRINCIPAL DE LA GALERÍA
 ======================================== */
@@ -126,5 +115,4 @@ body {
     #gridFotosCategoria {
         grid-template-columns: repeat(3, 1fr);
     }
->>>>>>> 952d7ba06df27d44209997a7d20a161975e39155
 }

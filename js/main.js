@@ -100,47 +100,67 @@ const crearImagen = (imagen) => {
 // 4. Ejecutamos la función
 pintarImagenes();
 
-
-
-
-
-
-
-
-
-
 /////////////////////////////
-// BUSCADOR DE IMAGENES
+// MOSTRAR TRES CATEGORIAS
 /////////////////////////////
 
-// Eventos
-// Bussqueda de imagenes por input
-const input = document.querySelector("#palabraClave");
-const formulario = document.querySelector("#busqueda");
-formulario.addEventListener("submit", (ev) => {
-    ev.preventDefault(); // Evita que la página se recargue y corte el fetch
-    pintarImagCategoria(); // funcion pintar 3 imagenes
+// Imagenes de inicio 3 categorias
+const categoria = document.querySelector("#categoria");
+document.addEventListener("click", (ev) => {
+    if (ev.target.matches("#categoria img")) {
+        const tag = ev.target.dataset.query;
+        pintarImagenes(tag); //
+    }
 });
 
-// Pintar de imagenes por palabra en input
-const pintarImagCategoria = async () => {
-    const inputBusqueda = input.value.trim();
-    if (inputBusqueda === "") return;
+//array fijo de categorias
+const categoriasElegidas = [
+    { titulo: "Naturaleza", query: "nature" },
+    { titulo: "Tecnología", query: "technology" },
+    { titulo: "Personas", query: "people" },
+];
+
+const crearCategoria = (coleccion, categoriasElegidas) => {
+    const contenedor = document.createElement("article");
+    const titulo = document.createElement("h3");
+    titulo.textContent = categoriasElegidas.titulo;
+
+    const img = document.createElement("img");
+    img.src = coleccion.cover_photo.urls.small;
+    img.alt = categoriasElegidas.titulo;
+    img.dataset.query = categoriasElegidas.query;
+
+    contenedor.append(titulo, img);
+    return contenedor;
+};
+
+const mostrarCategoriaImg = async () => {
+    const query = "nature technology people";
     const buscarDatos = await consultarApi(
-        `${baseUrl}search/collections?page=1&query=${inputBusqueda}&per_page=3`,
-    ); //llamo la llamas la API con valor del input y pido 3 imágenes
-    const categoria = document.querySelector("#categoria");
+        `${baseUrl}search/collections?query=${query}&page=1&per_page=3`,
+    ); //llamo la llamas la API con valor del input y pido 3 categorias / quey con las categorias fijas
+
     categoria.innerHTML = "";
-    if (!buscarDatos || buscarDatos.results.length === 0) {
+    if (
+        !buscarDatos ||
+        !buscarDatos.results === 0 ||
+        buscarDatos.results.length === 0
+    ) {
         categoria.innerHTML = "<p>No hay resultados para esa categoría.</p>";
         return;
     }
-    // 3. recorrer array results y pintas cada imagen
+    // console.log(buscarDatos.results[0]);
+
+    // 3. recorrer 3 results que da la api
     const fragment = document.createDocumentFragment();
-    buscarDatos.results.forEach((imagen) => {
-        const tarjeta = crearImagen(imagen);
+    buscarDatos.results.forEach((coleccion, index) => {
+        const miCategoria = categoriasElegidas[index]; // categoría fija según la vuelta del bucle del array fijo
+
+        const tarjeta = crearCategoria(coleccion, miCategoria); // combinacion foto de la API y categoría
+
         fragment.append(tarjeta);
     });
 
     categoria.append(fragment);
 };
+mostrarCategoriaImg();
