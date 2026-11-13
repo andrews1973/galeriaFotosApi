@@ -1,38 +1,25 @@
 const consultarApi = async (url) => {
+  try {
+    // 1. Comillas agregadas en 'GET' y en el valor de 'Authorization'
+    const respuesta = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: 'Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k'
+      }
+    });
 
-    try {
-
-        // Limpiar errores anteriores
-        erroresApi.textContent = "";
-
-        // Realizar la petición a la URL recibida
-        const respuesta = await fetch(url);
-
-        // Comprobar si la respuesta es correcta
-        if (!respuesta.ok) {
-
-            throw new Error("Error HTTP: " + respuesta.status);
-
-        }
-
-        // Convertir el JSON en datos JavaScript
-        const datos = await respuesta.json();
-
-        // Devolver los datos obtenidos
-        return datos;
-
-    } catch (error) {
-
-        // Mostrar el error en el DOM
-        console.log("Ha ocurrido un error:", error);
-
-        pintarErrores(error.message, erroresApi);
-
-        // Devolver null para indicar que ha habido un error
-        return null;
-
+    if (!respuesta.ok) {
+      throw new Error(`Error HTTP: ${respuesta.status}`);
     }
 
+    const datos = await respuesta.json();
+    return datos;
+  } catch (error) {
+    console.log('Ha ocurrido un error:', error);
+    return null;
+  }
 };
 
-const datosRecibidos = consultarApi("")
+
+
+
