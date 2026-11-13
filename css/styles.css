@@ -11,3 +11,7 @@
 .mostrar {
     display: block;
 }
+
+.categoria{
+    display: flex;
+}
