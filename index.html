@@ -1,53 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Galeria del fotos API</title>
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria del fotos API</title>
-    <link rel="stylesheet" href="css/styles.css">
-</head>
+    <body>
+        <header>
+            <h1>Galeria del fotos API</h1>
+        </header>
 
-<body>
-    <header>
-        <h1>Galeria del fotos API</h1>
-    </header>
+        <main>
+            <section id="menuSelectores" class="menuSelectores">
+                <form action="" id="busqueda">
+                    <input
+                        type="text"
+                        name="buscar"
+                        id="buscar"
+                        placeholder="Busca tu foto"
+                    />
+                    <button type="submit">Buscar</button>
+                </form>
 
-    <main>
-        <section id="menuSelectores" class="menuSelectores">
-            <form action="" id="busqueda">
-                <input type="text" name="buscar" id="buscar" placeholder="Busca tu foto">
-                <button type="submit">Buscar</button>
-            </form>
+                <button type="button">Mostrar Favoritos</button>
 
-            <button type="button">Mostrar Favoritos</button>
+                <label for="oritacionFotos">Fitro por orientación</label>
+                <select name="orientacionFoto" id="orientacionFoto">
+                    <option value="todas">Todas</option>
+                    <option value="verticales">Verticales</option>
+                    <option value="horizontales">Horizontales</option>
+                </select>
+            </section>
+            <section id="categoria" class="categoria">
+                <button type="button">Naturaleza</button>
+                <button type="button">Tecnología</button>
+                <button type="button">Personas</button>
+            </section>
+            <section
+                id="gridFotosCategoria"
+                class="gridFotosCategoria"
+            ></section>
+            <section id="modalFavoritos" class="modalFavoritos ocultar">
+                <!-- Modal con los favitos con display none de base y un toggle que cambie la clase al hacer clic en favoritos -->
+            </section>
+        </main>
 
-            <label for="oritacionFotos">Fitro por orientación</label>
-            <select name="orientacionFoto" id="orientacionFoto">
-                <option value="todas">Todas</option>
-                <option value="verticales">Verticales</option>
-                <option value="horizontales">Horizontales</option>
-            </select>
-        </section>
-        <section id="categoria" class="categoria">
-            <button type="button">Naturaleza</button>
-            <button type="button">Tecnología</button>
-            <button type="button">Personas</button>
-        </section>
-        <section id="gridFotosCategoria" class="gridFotosCategoria">
+        <footer></footer>
 
-        </section>
-        <section id="modalFavoritos" class="modalFavoritos ocultar">
-            <!-- Modal con los favitos con display none de base y un toggle que cambie la clase al hacer clic en favoritos -->
-        </section>
-
-    </main>
-
-    <footer>
-
-    </footer>
-
-    <script src="js/main.js"></script>
-</body>
-
+        <script src="js/main.js"></script>
+    </body>
 </html>
