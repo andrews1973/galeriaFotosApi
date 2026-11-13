@@ -56,6 +56,9 @@ const pintarImagenes = async (query = "nature") => {
     // Obtenemos el array de fotografías
     const fotos = datosRecibidos.results;
 
+    // Limpiamos las fotografías anteriores
+    gridFotosCategoria.innerHTML = "";
+
     // Creamos un fragmento para almacenar los elementos
     const fragment = document.createDocumentFragment();
 
