@@ -56,7 +56,7 @@ const consultarApi = async (url) => {
 const pintarImagenes = async (
     query = "nature",
     page = 1,
-    per_page = 10,
+    per_page = 16,
     orientacion = "landscape",
     zona = gridFotosCategoria,
 ) => {
@@ -132,8 +132,7 @@ const crearImagen = (imagen) => {
     return contenedor;
 };
 
-// 4. Ejecutamos la función
-//pintarImagenes();
+// 4. Ejecutamos la función 3 veces una por cada imagen
 pintarImagenes("nature", 1, 1, "landscape", img1);
 pintarImagenes("tecnology", 1, 1, "landscape", img2);
 pintarImagenes("people", 1, 1, "landscape", img3);
