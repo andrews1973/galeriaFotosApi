@@ -7,14 +7,23 @@ const baseUrl = "https://api.unsplash.com/";
 //const per_page = 10; //  	Number of items per page. (Optional; default: 10)
 
 // Naturaleza
+// pintarImagenes('nature', 1, 1);
 // https://api.unsplash.com/search/photos?query=nature&per_page=1
 // Tecnología
 // https://api.unsplash.com/search/photos?query=technology&per_page=1
+// pintarImagenes('technology', 1, 1);
 // Personas
 // https://api.unsplash.com/search/photos?query=people&per_page=1
+// pintarImagenes('people', 1, 1);
 
 // querySelector
-const select = document.querySelector("orientacionFoto");
+const select = document.querySelector("#orientacionFoto");
+const img1 = document.querySelector("#categoria #img1");
+const img2 = document.querySelector("#categoria #img2");
+const img3 = document.querySelector("#categoria #img3");
+const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
+const formulario = document.querySelector("#busqueda");
+const inputBuscar = document.querySelector("#buscar");
 
 // 1. Función para consultar la API
 const consultarApi = async (url) => {
@@ -49,13 +58,11 @@ const pintarImagenes = async (
     page = 1,
     per_page = 10,
     orientacion = "landscape",
+    zona = gridFotosCategoria,
 ) => {
-    // Seleccionamos el contenedor del HTML
-    const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
-
     try {
         // Comprobamos que existe el contenedor
-        if (!gridFotosCategoria) {
+        if (!zona) {
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
@@ -74,13 +81,12 @@ const pintarImagenes = async (
 
         // Comprobamos que existen fotografías
         if (fotos.length === 0) {
-            gridFotosCategoria.innerHTML =
-                "<p>No se encontraron fotografías.</p>";
+            zona.innerHTML = "<p>No se encontraron fotografías.</p>";
             return;
         }
 
         // Limpiamos las fotografías anteriores
-        gridFotosCategoria.innerHTML = "";
+        zona.innerHTML = "";
 
         // Creamos un fragmento para almacenar los elementos
         const fragment = document.createDocumentFragment();
@@ -92,12 +98,12 @@ const pintarImagenes = async (
         });
 
         // Añadimos todos los elementos al DOM
-        gridFotosCategoria.append(fragment);
+        zona.append(fragment);
     } catch (error) {
         console.error("Error al pintar las imágenes:", error);
 
-        if (gridFotosCategoria) {
-            gridFotosCategoria.innerHTML =
+        if (zona) {
+            zona.innerHTML =
                 "<p>Ha ocurrido un error al cargar las fotografías.</p>";
         }
     }
@@ -127,11 +133,13 @@ const crearImagen = (imagen) => {
 };
 
 // 4. Ejecutamos la función
-pintarImagenes();
+//pintarImagenes();
+pintarImagenes("nature", 1, 1, "landscape", img1);
+pintarImagenes("tecnology", 1, 1, "landscape", img2);
+pintarImagenes("people", 1, 1, "landscape", img3);
 
 //busqueda
-const formulario = document.querySelector("#busqueda");
-const inputBuscar = document.querySelector("#buscar");
+
 formulario.addEventListener("submit", (event) => {
     // Evitamos que el formulario recargue la página
     event.preventDefault();
@@ -142,5 +150,15 @@ formulario.addEventListener("submit", (event) => {
     // Comprobamos que no esté vacío
     if (textoBuscar !== "") {
         pintarImagenes(textoBuscar);
+    }
+});
+
+document.addEventListener("click", (ev) => {
+    const categoriaDiv = ev.target.closest("#categoria > div");
+    //Busca hacia arriba desde la imagen hasta encontrar el primer elemento que coincida con #categoria > div
+
+    if (categoriaDiv) {
+        const query = categoriaDiv.dataset.query;
+        pintarImagenes(query);
     }
 });

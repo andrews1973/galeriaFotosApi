@@ -170,8 +170,9 @@ header h1 {
 
 /* Título superpuesto sobre la imagen */
 
-.categoria article h3 {
+.categoria article h4 {
     position: absolute;
+    z-index: 9999;
     bottom: 0;
     left: 0;
 
