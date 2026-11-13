@@ -1,72 +1,91 @@
+// URL base de la API
 const baseUrl = "https://api.unsplash.com/";
 
+// 1. Función para consultar la API
 const consultarApi = async (url) => {
     try {
-        // Limpiar errores anteriores
-        erroresApi.textContent = "";
+        const respuesta = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization:
+                    "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
+            },
+        });
 
-        // Realizar la petición a la URL recibida
-        const respuesta = await fetch(url);
-
-        // Comprobar si la respuesta es correcta
+        // Comprobamos si la respuesta es correcta
         if (!respuesta.ok) {
-            throw new Error("Error HTTP: " + respuesta.status);
+            throw new Error(`Error HTTP: ${respuesta.status}`);
         }
 
-        // Convertir el JSON en datos JavaScript
+        // Convertimos la respuesta a JSON
         const datos = await respuesta.json();
 
-        // Devolver los datos obtenidos
         return datos;
     } catch (error) {
-        // Mostrar el error en el DOM
         console.log("Ha ocurrido un error:", error);
-
-        pintarErrores(error.message, erroresApi);
-
-        // Devolver null para indicar que ha habido un error
         return null;
     }
 };
 
-/////////////////////////////////////////////////////////////////
-const contenedorResultados = document.querySelector("#contenedor");
+// 2. Función para pintar las imágenes
+const pintarImagenes = async () => {
+    // Seleccionamos el contenedor del HTML
+    const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 
-const pintarDatos = async (url) => {
-    // 1. Llamar a tu función consultarApi y esperar los datos
-    const datos = await consultarApi(url);
+    // Esperamos a recibir los datos de la API
+    const datosRecibidos = await consultarApi(`${baseUrl}collections?page=8`);
 
-    // 2. Comprobar si hubo un error (si consultarApi devolvió null, detenemos la ejecución)
-    if (!datos) {
+    // Comprobamos que hemos recibido datos
+    if (!datosRecibidos) {
+        gridFotosCategoria.innerHTML =
+            "<p>No se pudieron cargar las colecciones.</p>";
         return;
     }
 
-    // 3. Limpiar el contenedor antes de pintar nuevos elementos
-    contenedorResultados.innerHTML = "";
+    // Creamos un fragmento para almacenar los elementos
+    const fragment = document.createDocumentFragment();
 
-    // 4. Usar un DocumentFragment para mejorar el rendimiento al insertar en el DOM
-    const fragmento = document.createDocumentFragment();
+    // Recorremos el array recibido de la API
+    datosRecibidos.forEach((imagenObj) => {
+        // Creamos una tarjeta y recogemos el elemento devuelto
+        const contenedor = crearImagen(imagenObj);
 
-    // 5. Recorrer los datos (asumiendo que la API devuelve un array de objetos)
-    datos.forEach((item) => {
-        // Crear los elementos HTML necesarios
-        const tarjeta = document.createElement("article");
-        const titulo = document.createElement("h2");
-        const descripcion = document.createElement("p");
-
-        // Rellenar con las propiedades que devuelva tu API (ej. item.name, item.title, etc.)
-        titulo.textContent = item.title || item.name;
-        descripcion.textContent = item.body || item.description;
-
-        // Añadir los elementos a la tarjeta y la tarjeta al fragmento
-        tarjeta.append(titulo, descripcion);
-        fragmento.append(tarjeta);
+        // Añadimos la tarjeta al fragmento
+        fragment.append(contenedor);
     });
 
-    // 6. Pintar todo de una sola vez en el DOM
-    contenedorResultados.append(fragmento);
+    // Añadimos todos los elementos al DOM
+    gridFotosCategoria.append(fragment);
 };
-//////////////////////////////////////////////////////////////////////////////
+
+// 3. Función para crear cada tarjeta de imagen
+const crearImagen = (imagen) => {
+    // Creamos el article
+    const contenedor = document.createElement("article");
+
+    // Creamos el título
+    const titulo = document.createElement("h4");
+    titulo.textContent = imagen.title;
+
+    // Creamos la imagen
+    const img = document.createElement("img");
+    img.src = imagen.cover_photo?.urls?.small || "";
+    img.alt = imagen.cover_photo?.alt_description || imagen.title;
+    img.title = imagen.title;
+
+    // Añadimos el título y la imagen al article
+    contenedor.append(titulo, img);
+
+    // Devolvemos el article completo
+    return contenedor;
+};
+
+// 4. Ejecutamos la función
+pintarImagenes();
+
+/////////////////////////////
+// Buscador imagenes
+/////////////////////////////
 
 // Eventos
 // Bussqueda de imagenes por input
@@ -79,6 +98,5 @@ document.addEventListener("click", (ev) => {
 });
 
 const PintarImagCategoria = () => {
-    
     consultarApi(`${baseUrl}/collections?page=8`);
 };
