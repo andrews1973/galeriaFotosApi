@@ -1,3 +1,5 @@
+const baseUrl ="https://api.unsplash.com/"
+
 const consultarApi = async (url) => {
   try {
     // 1. Comillas agregadas en 'GET' y en el valor de 'Authorization'
@@ -21,11 +23,11 @@ const consultarApi = async (url) => {
 };
 
 // 2. Función asíncrona para esperar los datos
-const mostrarColecciones = async () => {
+const pintarImagenes = async () => {
  
   
   // Usamos await para esperar a que la API responda
-  const datosRecibidos = await consultarApi('https://api.unsplash.com/collections?page=8');
+  const datosRecibidos = await consultarApi(`${baseUrl}collections?page=8`);
 
   // Validamos que haya datos antes de intentar dibujarlos
   if (!datosRecibidos) {
@@ -51,7 +53,7 @@ const mostrarColecciones = async () => {
 };
 
 // Ejecutamos la función
-mostrarColecciones();
+pintarImagenes();
 
 
 
