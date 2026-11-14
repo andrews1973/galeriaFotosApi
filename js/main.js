@@ -107,6 +107,7 @@ const pintarImagenes = async (
                 "<p>Ha ocurrido un error al cargar las fotografías.</p>";
         }
     }
+   
 };
 
 // 3. Función para crear cada tarjeta de imagen
@@ -161,3 +162,33 @@ document.addEventListener("click", (ev) => {
         pintarImagenes(query);
     }
 });
+
+///////////////////
+//Local storage
+////////////
+const leerLocalStorage = () => {
+    const favorito = JSON.parse(localStorage.getItem("favoritosFotos")) || [];
+    console.log("favo ", favorito);
+    return favorito;
+};
+
+
+const guardarLocalStorage = (favoritos) => {
+    // la lista que entrara en el input y cambiarla con strinfy a texto
+    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
+    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
+
+    console.log("favv", favoritos);
+};
+
+leerLocalStorage();
+
+/// ESTO ES PARA METER A LOS EVENTOS
+const botonFavorito = document.querySelector("#verFavoritos"); // lamando el boton favoritos
+if (botonFavorito) {
+  botonFavorito.addEventListener("click", () => {
+    const misFavoritos = leerLocalStorage();
+    pintarFavoritos(misFavoritos, gridFotosCategoria); 
+    //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
+  });
+}
