@@ -24,7 +24,7 @@ const img3 = document.querySelector("#categoria #img3");
 const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
-
+console.log(select);
 // 1. Función para consultar la API
 const consultarApi = async (url) => {
     try {
