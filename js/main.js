@@ -100,3 +100,14 @@ const crearImagen = (imagen) => {
 
 // 4. Ejecutamos la función
 pintarImagenes();
+
+
+
+
+
+
+
+////////////////////
+//FAVORITOS
+//////////////////
+
