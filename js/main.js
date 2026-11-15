@@ -26,6 +26,7 @@ const img3 = document.querySelector("#categoria #img3");
 const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
+const modalFavoritos = document.querySelector("#modalFavoritos");
 
 // 1. Función para consultar la API
 const consultarApi = async (url) => {
@@ -175,12 +176,29 @@ formulario.addEventListener("submit", (event) => {
 });
 
 document.addEventListener("click", (ev) => {
+    // delegacion de eventos
+    // closest() comprueba el elemento pulsado y después sus padres
+    // Busca hacia elementos padres la imagen hasta encontrar el primer elemento que coincida con #categoria > div
     const categoriaDiv = ev.target.closest("#categoria > div");
-    //Busca hacia arriba desde la imagen hasta encontrar el primer elemento que coincida con #categoria > div
 
     if (categoriaDiv) {
         const query = categoriaDiv.dataset.query;
         queryActual = query;
         pintarImagenes(query);
     }
+
+    // Comprobar si hemos pulsado el botón de favoritos
+    const botonFavoritos = ev.target.closest("#mostrarFavoritos");
+
+    if (botonFavoritos) {
+        modalFavoritos.classList.toggle("ocultar");
+    }
+
+    // Comprobar si hemos pulsado el botón de cerrar favoritos
+    const cerrarFavoritos = ev.target.closest("#cerrarFavoritos");
+
+    if (cerrarFavoritos) {
+        modalFavoritos.classList.add("ocultar");
+    }
+
 });

@@ -30,7 +30,7 @@
                 <button type="submit">Buscar</button>
             </form>
 
-            <button type="button">Mostrar Favoritos</button>
+            <button type="button" id="mostrarFavoritos">Mostrar Favoritos</button>
 
             <label for="orientacionFoto">Filtro por orientación</label>
 
@@ -66,9 +66,16 @@
 
         </section>
 
-        <!-- MODAL DE FAVORITOS -->
         <section id="modalFavoritos" class="modalFavoritos ocultar">
-            <!-- Aquí se mostrarán los favoritos -->
+
+            <button type="button" id="cerrarFavoritos" aria-label="Cerrar favoritos">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h2>Mis favoritos</h2>
+
+            <div id="listaFavoritos"></div>
+
         </section>
 
     </main>

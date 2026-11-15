@@ -355,6 +355,41 @@ footer p {
     font-size: 0.9rem;
 }
 
+/* Popup de favoritos */
+.modalFavoritos {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    min-height: 300px;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    z-index: 99999;
+}
+
+/* Botón cerrar */
+#cerrarFavoritos {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border: none;
+    background: transparent;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+}
+
+#cerrarFavoritos:hover {
+    color: #e63946;
+}
+
+.ocultar {
+    display: none;
+}
+
 /* ========================================
    9. TABLET - 768px
 ======================================== */
