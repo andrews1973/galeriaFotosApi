@@ -174,12 +174,16 @@ formulario.addEventListener("submit", (event) => {
     }
 });
 
-select.addEventListener("change",(ev) => {
-    console.log("Ha cambiado la orientación de tu imagen");
+// A la caja select, cuando cambie la opción, pido las fotos con esa orientación
+select.addEventListener("change", (ev) => {
+    // console.log("Ha cambiado la orientación de tu imagen");
+    // target es el objetivo (el select) y value el valor elegido: portrait, landscape o squarish
     const orientacionElegida = ev.target.value;
-    console.log(orientacionElegida);
+    // console.log(orientacionElegida);
+    // Pido a Unsplash la última búsqueda (queryActual) filtrada por la orientación elegida
     pintarImagenes(queryActual, 1, 16, orientacionElegida);
 });
+
 
 document.addEventListener("click", (ev) => {
     const categoriaDiv = ev.target.closest("#categoria > div");
