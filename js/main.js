@@ -178,6 +178,7 @@ select.addEventListener("change",(ev) => {
     console.log("Ha cambiado la orientación de tu imagen");
     const orientacionElegida = ev.target.value;
     console.log(orientacionElegida);
+    pintarImagenes(queryActual, 1, 16, orientacionElegida);
 });
 
 document.addEventListener("click", (ev) => {
