@@ -174,8 +174,10 @@ formulario.addEventListener("submit", (event) => {
     }
 });
 
-select.addEventListener("change",() => {
+select.addEventListener("change",(ev) => {
     console.log("Ha cambiado la orientación de tu imagen");
+    const orientacionElegida = ev.target.value;
+    console.log(orientacionElegida);
 });
 
 document.addEventListener("click", (ev) => {
