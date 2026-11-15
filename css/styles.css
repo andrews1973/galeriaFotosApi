@@ -267,6 +267,52 @@ header h1 {
     transform: scale(1.08);
 }
 
+/* Botón de favoritos */
+
+#gridFotosCategoria article .botonFavorito {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.5rem;
+    height: 2.5rem;
+
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        transform 0.3s ease;
+}
+
+/* Efecto al pasar el ratón */
+
+#gridFotosCategoria article .botonFavorito:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+/* Corazón cuando está seleccionado */
+
+#gridFotosCategoria article .botonFavorito.favorito {
+    color: #ff4d5a;
+}
+
+.categoria .botonFavorito {
+    display: none;
+}
+
 /* ========================================
    7. MODAL DE FAVORITOS
 ======================================== */

@@ -1,6 +1,8 @@
 // URL base de la API
 const baseUrl = "https://api.unsplash.com/";
 
+let queryActual = ""; // Search term, para guardar la busqueda
+
 //const orientacion = "landscape"; // orientation=landscape, portrait, squarish
 //const query = ""; // Search term
 //const page = 1; // Page number to retrieve. (Optional; default: 1)
@@ -93,7 +95,7 @@ const pintarImagenes = async (
 
         // Recorremos el array de fotografías
         fotos.forEach((imagenObj) => {
-            const contenedor = crearImagen(imagenObj);
+            const contenedor = crearImagen(imagenObj, zona, query);
             fragment.append(contenedor);
         });
 
@@ -110,14 +112,21 @@ const pintarImagenes = async (
 };
 
 // 3. Función para crear cada tarjeta de imagen
-const crearImagen = (imagen) => {
+const crearImagen = (imagen, zona, query) => {
     // Creamos el article
     const contenedor = document.createElement("article");
 
     // Creamos el título
     const titulo = document.createElement("h4");
-    titulo.textContent =
-        imagen.description || imagen.alt_description || "Sin título";
+
+    // Comprobamos dónde vamos a mostrar la imagen, dependiendo de ello mostramos un titulo diferente en la imagen
+    if (zona !== gridFotosCategoria) {
+        // Si es una colleccion de las 3 de imagenes de arriba, mostramos el término de búsqueda como título, en mayuscula
+        titulo.textContent = query.toUpperCase();
+    } else {
+        // Si es una fotografía de la galería, mostramos su descripción
+        titulo.textContent = imagen.alt_description || "Sin título";
+    }
 
     // Creamos la imagen
     const img = document.createElement("img");
@@ -125,8 +134,20 @@ const crearImagen = (imagen) => {
     img.alt = imagen.alt_description || "Fotografía de Unsplash";
     img.title = imagen.description || imagen.alt_description || "Sin título";
 
-    // Añadimos el título y la imagen al article
-    contenedor.append(titulo, img);
+    // Creamos el botón de favoritos
+    const botonFavorito = document.createElement("button");
+    botonFavorito.type = "button";
+    botonFavorito.classList.add("botonFavorito");
+
+    // Creamos el icono del corazón con font awesome
+    const corazon = document.createElement("i");
+    corazon.classList.add("fa-regular", "fa-heart");
+
+    // Añadimos el corazón al botón
+    botonFavorito.append(corazon);
+
+    // Añadimos los elementos al article
+    contenedor.append(titulo, img, botonFavorito);
 
     // Devolvemos el article completo
     return contenedor;
@@ -134,7 +155,7 @@ const crearImagen = (imagen) => {
 
 // 4. Ejecutamos la función 3 veces una por cada imagen
 pintarImagenes("nature", 1, 1, "landscape", img1);
-pintarImagenes("tecnology", 1, 1, "landscape", img2);
+pintarImagenes("technology", 1, 1, "landscape", img2);
 pintarImagenes("people", 1, 1, "landscape", img3);
 
 //busqueda
@@ -146,8 +167,9 @@ formulario.addEventListener("submit", (event) => {
     // Obtenemos el valor del input
     const textoBuscar = inputBuscar.value.trim();
 
-    // Comprobamos que no esté vacío
+    // Comprobamos que no esté vacío y guardamos el termino a buscar en queryActual
     if (textoBuscar !== "") {
+        queryActual = textoBuscar;
         pintarImagenes(textoBuscar);
     }
 });
@@ -158,6 +180,7 @@ document.addEventListener("click", (ev) => {
 
     if (categoriaDiv) {
         const query = categoriaDiv.dataset.query;
+        queryActual = query;
         pintarImagenes(query);
     }
 });
