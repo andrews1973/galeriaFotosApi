@@ -174,6 +174,10 @@ formulario.addEventListener("submit", (event) => {
     }
 });
 
+select.addEventListener("change",() => {
+    console.log("Ha cambiado la orientación de tu imagen");
+});
+
 document.addEventListener("click", (ev) => {
     const categoriaDiv = ev.target.closest("#categoria > div");
     //Busca hacia arriba desde la imagen hasta encontrar el primer elemento que coincida con #categoria > div
