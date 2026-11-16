@@ -107,7 +107,6 @@ const pintarImagenes = async (
                 "<p>Ha ocurrido un error al cargar las fotografías.</p>";
         }
     }
-   
 };
 
 // 3. Función para crear cada tarjeta de imagen
@@ -172,7 +171,6 @@ const leerLocalStorage = () => {
     return favorito;
 };
 
-
 const guardarLocalStorage = (favoritos) => {
     // la lista que entrara en el input y cambiarla con strinfy a texto
     const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
@@ -186,26 +184,32 @@ leerLocalStorage();
 /// ESTO ES PARA METER A LOS EVENTOS
 const botonFavorito = document.querySelector("#verFavoritos"); // lamando el boton favoritos
 if (botonFavorito) {
-  botonFavorito.addEventListener("click", () => {
-    const misFavoritos = leerLocalStorage();
-    pintarFavoritos(misFavoritos, gridFotosCategoria); 
-    //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
-  });
+    botonFavorito.addEventListener("click", () => {
+        const misFavoritos = leerLocalStorage();
+        pintarFavoritos(misFavoritos, gridFotosCategoria);
+        //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
+    });
 }
 
 const favoritos = () => {
-let favoritosLocal = leerLocalStorage();
+    let favoritosLocal = leerLocalStorage();
 
- if (existe) {
-                favoritosLocal.forEach(element => {
-                    pintarFavoritos(element); // sera la funcion de pintar en el modal 
-                });
-            } else {
-                favoritosLocal.forEach(element => {
-                    pintarFavoritos(element); // sera la funcion de pintar en el modal 
-                });
-            }
+    if (existe) {
+        favoritosLocal.forEach((element) => {
+            pintarFavoritos(element); // sera la funcion de pintar en el modal
         });
+    } else {
+        favoritosLocal.forEach((element) => {
+            pintarFavoritos(element); // sera la funcion de pintar en el modal
+        });
+    }
+};
+// container.innerHTML = '';  // vaciar el contenedor
 
-        guardarLocalStorage(favoritos);
-// container.innerHTML = '';
+guardarLocalStorage(favoritos);
+
+
+const pintarFavoritos = () => {
+
+    
+}
