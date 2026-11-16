@@ -333,5 +333,4 @@ const crearFavorito = (imagen) => {
 };
 
 mostrarCategorias();
-mostrarCategorias();
 pintarFavoritos();
