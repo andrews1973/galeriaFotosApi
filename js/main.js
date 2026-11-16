@@ -213,17 +213,13 @@ document.addEventListener("click", (ev) => {
     }
 
     const clikCorazon = ev.target.closest(".botonFavorito");
+    const listaFavoritos = document.querySelector("#listaFavoritos");
     if (clikCorazon) {
         const id = clikCorazon.target.id;
         const src = clikCorazon.target.src;
         const alt = clikCorazon.target.alt;
         const cajaFavoritos = pintarFavoritos({ id, src, alt });
-
-        console.log(cajaFavoritos);
-
-        pintarFavoritos({ id });
-        console.log(id);
-     
+        cajaFavoritos.append(listaFavoritos);
 
         //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
     }
@@ -258,12 +254,26 @@ leerLocalStorage();
 
 // guardarLocalStorage(favoritos);
 
+const aniadirFavorito = () => {
+    const favoritoEncontrado = buscarFavorito(ObjetoImagen);
+    if (favoritoEncontrado) {
+        const nuevaImagen = {
+            id: ObjetoImagen.id,
+            src: ObjetoImagen.src,
+            alt: ObjetoImagen.alt,
+            titulo: ObjetoImagen.title,
+        };
+        favoritos.push(nuevaImagen);
+    } else {
+          console.log("<p>La imagen ya existe</p>");
+            // return;
+        }
+    };
+    
 const pintarFavoritos = () => {
-    console.log("pintando");
+    // console.log("pintando");
+    modalFavoritos.innerHTML = ""; // vaciar el contenedor
+    let favoritosLocal = leerLocalStorage();
 
-    // // container.innerHTML = '';  // vaciar el contenedor
-    // let favoritosLocal = leerLocalStorage();
-
-    //favoritosLocal.push(cajaFavoritos);
-
+    // const foreach
 };
