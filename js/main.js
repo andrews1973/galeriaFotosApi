@@ -3,6 +3,11 @@ const baseUrl = "https://api.unsplash.com/";
 
 let queryActual = "nature"; // Search term, para guardar la busqueda
 
+let paginaActual = 1;
+let orientacionActual = "";
+console.log(paginaActual, orientacionActual);
+
+
 //const orientacion = "landscape"; // orientation=landscape, portrait, squarish
 //const query = ""; // Search term
 //const page = 1; // Page number to retrieve. (Optional; default: 1)
