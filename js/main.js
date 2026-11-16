@@ -62,7 +62,7 @@ select.addEventListener("change", async () => {
         gridFotosCategoria.classList.add("orientacion-cuadrada");
     }
 
-    // Volvemos a consultar las fotografías
+    // Volvemos a consultar las fotografías, esperamos a que se pinten
     await pintarImagenes(queryActual, 1, 16, orientacion);
 
     bajarAGaleria();
@@ -235,6 +235,8 @@ const mostrarCategorias = () => {
     categoria.append(fragment);
 };
 
+//desplazar automáticamente la página hasta que un elemento HTML sea visible en la pantalla
+// bajamos hasta la seccion donde se pinta el grid
 const bajarAGaleria = () => {
     document.querySelector("#seccionFotografias").scrollIntoView({
         behavior: "smooth",
