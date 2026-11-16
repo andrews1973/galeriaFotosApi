@@ -15,7 +15,7 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
-
+const contenedor = document.querySelector("#listaFavoritos");
 // Creamos un fragmento para almacenar los elementos
 const fragment = document.createDocumentFragment();
 
@@ -68,7 +68,7 @@ select.addEventListener("change", async () => {
     bajarAGaleria();
 });
 
-document.addEventListener("click", async (ev) => {
+document.addEventListener("click", (ev) => {
     // delegacion de eventos
     // closest() comprueba el elemento pulsado y después sus padres
     // Busca hacia elementos padres la imagen hasta encontrar el primer elemento que coincida con #categoria > div
@@ -94,9 +94,98 @@ document.addEventListener("click", async (ev) => {
     if (cerrarFavoritos) {
         modalFavoritos.classList.add("ocultar");
     }
+    // Evento de agragar favoritos
+    const clickFavoritos = ev.target.closest(".botonFavorito");
+    if (clickFavoritos) {
+        const tarjeta = ev.target.closest("#gridFotosCategoria article");
+        if (!tarjeta) return;
+        const imagen = tarjeta.querySelector("img");
+        aniadirFavorito(imagen);
+        pintarFavoritos();
+    }
 });
 
-//console.log(select);
+///////////////////
+//FUNCIONES DE LOCAL STORAGE
+////////////////////
+
+const leerLocalStorage = () => {
+    const leerFavorito =
+        JSON.parse(localStorage.getItem("favoritosFotos")) || [];
+    // console.log("favo ", leerFavorito);
+    return leerFavorito;
+};
+
+let favoritos = leerLocalStorage();
+
+const guardarLocalStorage = (favoritos) => {
+    // la lista que entrara en el input y cambiarla con strinfy a texto
+    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
+    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
+
+    console.log("favv", favoritos);
+};
+
+///////////////////////////////
+// FUNCION GUARADAR FAVORITOS Y PINTAR
+////////////////////////////////
+
+const buscarFavorito = (idImagen) => {
+    return favoritos.find(({ id }) => id === idImagen);
+};
+
+const aniadirFavorito = (ObjetoImagen) => {
+    console.log(typeof ObjetoImagen);
+    const favoritoEncontrado = buscarFavorito(ObjetoImagen.id);
+    if (!favoritoEncontrado) {
+        const nuevaImagen = {
+            id: ObjetoImagen.id,
+            src: ObjetoImagen.src,
+            alt: ObjetoImagen.alt,
+            titulo: ObjetoImagen.title,
+        };
+        favoritos.push(nuevaImagen);
+
+        // console.log(nuevaImagen);
+    } else {
+        console.log("<p>La imagen ya existe</p>");
+        // return;
+    }
+    guardarLocalStorage(favoritos);
+};
+
+const pintarFavoritos = () => {
+    // console.log("pintando");
+    contenedor.innerHTML = ""; // vaciar el contenedor
+    // Creamos un fragmento
+    const fragmento = document.createDocumentFragment();
+    if (favoritos.length === 0) {
+        contenedor.innerHTML =
+            "<p>No has seleccionado una imagen favorita.</p>";
+        return;
+    } else {
+        // Recorremos los favoritos
+        favoritos.forEach((imagen) => {
+            // Creamos cada imagen reutilizando nuestra función
+            const elementoImagen = crearFavorito(imagen);
+            fragmento.append(elementoImagen);
+        });
+        // Añadimos todas las imágenes al contenedor
+        contenedor.append(fragmento);
+    }
+};
+
+const crearFavorito = (imagen) => {
+    const cajaFavorito = document.createElement("article");
+    const titulofavorito = document.createElement("h4");
+    titulofavorito.textContent = imagen.titulo;
+    const img = document.createElement("img");
+    img.src = imagen.src;
+    img.alt = imagen.alt;
+    cajaFavorito.append(titulofavorito, img);
+    return cajaFavorito;
+};
+
 // 1. Función para consultar la API
 const consultarApi = async (url) => {
     try {
@@ -243,3 +332,5 @@ const bajarAGaleria = () => {
 };
 
 mostrarCategorias();
+mostrarCategorias();
+pintarFavoritos();
