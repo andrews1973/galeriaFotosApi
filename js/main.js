@@ -104,7 +104,6 @@ const consultarApi = async (url) => {
         return datos;
     } catch (error) {
         console.log("Ha ocurrido un error:", error);
-        return null;
     }
 };
 
@@ -182,6 +181,7 @@ const crearImagen = (imagen, zona, query) => {
 
     // Creamos la imagen
     const img = document.createElement("img");
+    img.id = imagen.id
     img.src = imagen.urls.small;
     img.alt = imagen.alt_description || "Fotografía de Unsplash";
     img.title = imagen.description || imagen.alt_description || "Sin título";
