@@ -33,12 +33,21 @@ let orientacionActual = "";    // Orientación elegida en el select; "" = sin fi
 
 const categorias = ["nature", "technology", "people"];
 
-// Empieza una búsqueda desde cero: tema nuevo, página 1 y sin filtro de orientación (lo pidió Héctor)
+/**
+ * Empieza una búsqueda desde cero (lo pidió Héctor): tema nuevo, página 1 y sin filtro de orientación.
+ * La usan el buscador y las tres categorías de arriba.
+ * @param {string} tema - Palabra que se busca en Unsplash (por ejemplo "nature" o lo escrito en el buscador).
+ * @example
+ * nuevaBusqueda("technology"); // galería de tecnología, página 1, todas las orientaciones
+ */
 const nuevaBusqueda = async (tema) => {
     queryActual = tema;
     paginaActual = 1;
     orientacionActual = "";
     select.value = "";      // el select vuelve a «Selecciona una opción»
+    // La galería vuelve a su aspecto de partida (el del index.html), para que no se quede en vertical o cuadrada
+    gridFotosCategoria.classList.remove("orientacion-vertical", "orientacion-cuadrada");
+    gridFotosCategoria.classList.add("orientacion-horizontal");
     await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
     bajarAGaleria();
 };
