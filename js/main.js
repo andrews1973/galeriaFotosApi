@@ -15,6 +15,11 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+// Botones de la paginación (debajo de la galería)
+const pagAnterior = document.querySelector("#paginaAnterior");
+const pagSiguiente = document.querySelector("#paginaSiguiente");
+// console.log(pagAnterior, pagSiguiente);
+
 
 // Creamos un fragmento para almacenar los elementos
 const fragment = document.createDocumentFragment();
@@ -23,6 +28,8 @@ const fragment = document.createDocumentFragment();
 const baseUrl = "https://api.unsplash.com/";
 
 let queryActual = "nature"; // Search term, para guardar la busqueda
+let paginaActual = 1;          // Página en la que vamos; toda búsqueda empieza en la 1
+let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
 
 const categorias = ["nature", "technology", "people"];
 
@@ -128,7 +135,7 @@ const pintarImagenes = async (
     query = "nature",
     page = 1,
     per_page = 16,
-    orientacion = "landscape",
+    orientacion = "",               // "" = sin filtro: no se envía orientation y Unsplash devuelve todas
     zona = gridFotosCategoria,
 ) => {
     try {
@@ -137,9 +144,18 @@ const pintarImagenes = async (
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
-        // Esperamos a recibir los datos de la API
+                // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
+        let urlBusqueda = `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}`;
+        // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
+
+        // Si hay una orientación elegida, la pegamos al final de la dirección
+        if (orientacion !== "") {
+            urlBusqueda += `&orientation=${orientacion}`;
+        }
+
+        // Pedimos a la API la dirección ya montada y esperamos los datos
         const datosRecibidos = await consultarApi(
-            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+            urlBusqueda,
         );
 
         // Comprobamos que hemos recibido datos
