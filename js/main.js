@@ -15,6 +15,8 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+// Creamos un fragmento para almacenar los elementos
+const fragment = document.createDocumentFragment();
 
 // URL base de la API
 const baseUrl = "https://api.unsplash.com/";
@@ -143,9 +145,6 @@ const pintarImagenes = async (
         // Limpiamos las fotografías anteriores
         zona.innerHTML = "";
 
-        // Creamos un fragmento para almacenar los elementos
-        const fragment = document.createDocumentFragment();
-
         // Recorremos el array de fotografías
         fotos.forEach((imagenObj) => {
             const contenedor = crearImagen(imagenObj, zona, query);
@@ -214,10 +213,11 @@ const mostrarCategorias = () => {
         // Guardamos el término de búsqueda
         contendorFotoCategoria.dataset.query = query;
         // Añadimos el contenedor al HTML
-        categoria.append(contendorFotoCategoria);
+        fragment.append(contendorFotoCategoria);
         // Pintamos una fotografía dentro del contenedor
         pintarImagenes(query, 1, 1, "landscape", contendorFotoCategoria);
     });
+    categoria.append(fragment)
 };
 
 mostrarCategorias()
