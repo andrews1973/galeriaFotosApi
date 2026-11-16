@@ -32,6 +32,9 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+const pagAnterior = document.querySelector("#paginaAnterior");          // Botones de la paginación (debajo de la galería)
+const pagSiguiente = document.querySelector("#paginaSiguiente");
+console.log(pagAnterior, pagSiguiente);
 
 //console.log(select);
 // 1. Función para consultar la API
@@ -77,9 +80,14 @@ const pintarImagenes = async (
 
         // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
         let urlBusqueda = `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}`;
-        // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
-        // Pedimos a la API la dirección ya montada y esperamos los datos
+            // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
+        
+            // Si hay una orientación elegida, la pegamos al final de la dirección
+                if (orientacion !== "") {
+                urlBusqueda += `&orientation=${orientacion}`;
+        }
 
+        // Pedimos a la API la dirección ya montada y esperamos los datos
         const datosRecibidos = await consultarApi(
             urlBusqueda,
         );
