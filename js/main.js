@@ -186,7 +186,6 @@ select.addEventListener("change", (ev) => {
     pintarImagenes(queryActual, 1, 16, orientacionElegida);
 });
 
-
 document.addEventListener("click", (ev) => {
     // delegacion de eventos
     // closest() comprueba el elemento pulsado y después sus padres
@@ -213,4 +212,58 @@ document.addEventListener("click", (ev) => {
         modalFavoritos.classList.add("ocultar");
     }
 
+    const clikCorazon = ev.target.closest(".botonFavorito");
+    if (clikCorazon) {
+        const id = clikCorazon.target.id;
+        const src = clikCorazon.target.src;
+        const alt = clikCorazon.target.alt;
+        const cajaFavoritos = pintarFavoritos({ id, src, alt });
+
+        console.log(cajaFavoritos);
+
+        pintarFavoritos({ id });
+        console.log(id);
+     
+
+        //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
+    }
 });
+
+///////////////////
+//Local storage
+////////////////////
+
+let favoritos = [];
+
+const leerLocalStorage = () => {
+    const leerFavorito =
+        JSON.parse(localStorage.getItem("favoritosFotos")) || [];
+    // console.log("favo ", leerFavorito);
+    return leerFavorito;
+};
+
+const guardarLocalStorage = (favoritos) => {
+    // la lista que entrara en el input y cambiarla con strinfy a texto
+    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
+    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
+
+    console.log("favv", favoritos);
+};
+
+leerLocalStorage();
+
+///////////////////////////////
+// Guardar favortitos y pintar
+////////////////////////////////
+
+// guardarLocalStorage(favoritos);
+
+const pintarFavoritos = () => {
+    console.log("pintando");
+
+    // // container.innerHTML = '';  // vaciar el contenedor
+    // let favoritosLocal = leerLocalStorage();
+
+    //favoritosLocal.push(cajaFavoritos);
+
+};

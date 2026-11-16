@@ -1,91 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Galeria de fotos API</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria de fotos API</title>
+        <!-- Font Awesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+        />
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+        <!-- CSS propio -->
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
 
-    <!-- CSS propio -->
-    <link rel="stylesheet" href="css/styles.css">
-</head>
+    <body>
+        <header>
+            <h1>Galería de fotos API</h1>
+        </header>
 
-<body>
+        <main>
+            <!-- MENÚ DE BÚSQUEDA Y SELECTORES -->
+            <section id="menuSelectores" class="menuSelectores">
+                <form id="busqueda">
+                    <input
+                        type="text"
+                        name="buscar"
+                        id="buscar"
+                        placeholder="Busca tu foto"
+                    />
 
-    <header>
-        <h1>Galería de fotos API</h1>
-    </header>
+                    <button type="submit">Buscar</button>
+                </form>
 
-    <main>
+                <button type="button" id="mostrarFavoritos">
+                    Mostrar Favoritos
+                </button>
 
-        <!-- MENÚ DE BÚSQUEDA Y SELECTORES -->
-        <section id="menuSelectores" class="menuSelectores">
+                <label for="orientacionFoto">Filtro por orientación</label>
 
-            <form id="busqueda">
-                <input type="text" name="buscar" id="buscar" placeholder="Busca tu foto">
+                <select name="orientacionFoto" id="orientacionFoto">
+                    <option value="squarish">Cuadradas</option>
+                    <option value="portrait">Verticales</option>
+                    <option value="landscape" selected>Horizontales</option>
+                </select>
+            </section>
 
-                <button type="submit">Buscar</button>
-            </form>
+            <!-- SECCIÓN DE COLECCIONES -->
+            <section id="seccionColecciones">
+                <h2 class="tituloSeccion">Explora nuestras colecciones</h2>
 
-            <button type="button" id="mostrarFavoritos">Mostrar Favoritos</button>
+                <div id="categoria" class="categoria">
+                    <div id="img1" data-query="nature"></div>
+                    <div id="img2" data-query="technology"></div>
+                    <div id="img3" data-query="people"></div>
+                </div>
+            </section>
 
-            <label for="orientacionFoto">Filtro por orientación</label>
+            <!-- SECCIÓN DE FOTOGRAFÍAS -->
+            <section id="seccionFotografias">
+                <h2 class="tituloSeccion">Descubre nuestras fotografías</h2>
 
-            <select name="orientacionFoto" id="orientacionFoto">
-                <option value="squarish">Cuadradas</option>
-                <option value="portrait">Verticales</option>
-                <option value="landscape" selected>Horizontales</option>
-            </select>
+                <div id="gridFotosCategoria" class="gridFotosCategoria"></div>
+            </section>
 
-        </section>
+            <!--  seccion de FAVORITOS -->
+            <section id="modalFavoritos" class="modalFavoritos ocultar">
+                <button
+                    type="button"
+                    id="cerrarFavoritos"
+                    aria-label="Cerrar favoritos"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
 
-        <!-- SECCIÓN DE COLECCIONES -->
-        <section id="seccionColecciones">
+                <h2>Mis favoritos</h2>
 
-            <h2 class="tituloSeccion">Explora nuestras colecciones</h2>
+                <div id="listaFavoritos"></div>
+            </section>
+        </main>
 
-            <div id="categoria" class="categoria">
-                <div id="img1" data-query="nature"></div>
-                <div id="img2" data-query="technology"></div>
-                <div id="img3" data-query="people"></div>
-            </div>
+        <footer class="full-container">
+            <p>&copy; 2026 Team Hero Bootcamp</p>
+        </footer>
 
-        </section>
-
-        <!-- SECCIÓN DE FOTOGRAFÍAS -->
-        <section id="seccionFotografias">
-
-            <h2 class="tituloSeccion">Descubre nuestras fotografías</h2>
-
-            <div id="gridFotosCategoria" class="gridFotosCategoria">
-
-            </div>
-
-        </section>
-
-        <section id="modalFavoritos" class="modalFavoritos ocultar">
-
-            <button type="button" id="cerrarFavoritos" aria-label="Cerrar favoritos">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <h2>Mis favoritos</h2>
-
-            <div id="listaFavoritos"></div>
-
-        </section>
-
-    </main>
-
-    <footer class="full-container">
-        <p>&copy; 2026 Team Hero Bootcamp</p>
-    </footer>
-
-    <script src="js/main.js"></script>
-
-</body>
-
+        <script src="js/main.js"></script>
+    </body>
 </html>
