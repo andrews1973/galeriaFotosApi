@@ -1,13 +1,3 @@
-// URL base de la API
-const baseUrl = "https://api.unsplash.com/";
-
-let queryActual = "nature"; // Search term, para guardar la busqueda
-
-//const orientacion = "landscape"; // orientation=landscape, portrait, squarish
-//const query = ""; // Search term
-//const page = 1; // Page number to retrieve. (Optional; default: 1)
-//const per_page = 10; //  	Number of items per page. (Optional; default: 10)
-
 // Naturaleza
 // pintarImagenes('nature', 1, 1);
 // https://api.unsplash.com/search/photos?query=nature&per_page=1
@@ -20,147 +10,23 @@ let queryActual = "nature"; // Search term, para guardar la busqueda
 
 // querySelector
 const select = document.querySelector("#orientacionFoto");
-const img1 = document.querySelector("#categoria #img1");
-const img2 = document.querySelector("#categoria #img2");
-const img3 = document.querySelector("#categoria #img3");
+const categoria = document.querySelector("#categoria");
 const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+const contenedor = document.querySelector("#listaFavoritos");
+// Creamos un fragmento para almacenar los elementos
+const fragment = document.createDocumentFragment();
 
-//console.log(select);
-// 1. Función para consultar la API
-const consultarApi = async (url) => {
-    try {
-        const respuesta = await fetch(url, {
-            method: "GET",
-            headers: {
-                Authorization:
-                    "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
-            },
-        });
+// URL base de la API
+const baseUrl = "https://api.unsplash.com/";
 
-        // Comprobamos si la respuesta es correcta
-        if (!respuesta.ok) {
-            throw new Error(`Error HTTP: ${respuesta.status}`);
-        }
+let queryActual = "nature"; // Search term, para guardar la busqueda
 
-        // Convertimos la respuesta a JSON
-        const datos = await respuesta.json();
+const categorias = ["nature", "technology", "people"];
 
-        return datos;
-    } catch (error) {
-        console.log("Ha ocurrido un error:", error);
-        return null;
-    }
-};
-
-// 2. Función para pintar las imágenes
-
-const pintarImagenes = async (
-    query = "nature",
-    page = 1,
-    per_page = 16,
-    orientacion = "landscape",
-    zona = gridFotosCategoria,
-) => {
-    try {
-        // Comprobamos que existe el contenedor
-        if (!zona) {
-            throw new Error("No se encontró el contenedor de fotografías.");
-        }
-
-        // Esperamos a recibir los datos de la API
-        const datosRecibidos = await consultarApi(
-            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
-        );
-
-        // Comprobamos que hemos recibido datos
-        if (!datosRecibidos) {
-            throw new Error("No se pudieron cargar las fotografías.");
-        }
-
-        // Obtenemos el array de fotografías
-        const fotos = datosRecibidos.results;
-
-        // Comprobamos que existen fotografías
-        if (fotos.length === 0) {
-            zona.innerHTML = "<p>No se encontraron fotografías.</p>";
-            return;
-        }
-
-        // Limpiamos las fotografías anteriores
-        zona.innerHTML = "";
-
-        // Creamos un fragmento para almacenar los elementos
-        const fragment = document.createDocumentFragment();
-
-        // Recorremos el array de fotografías
-        fotos.forEach((imagenObj) => {
-            const contenedor = crearImagen(imagenObj, zona, query);
-            fragment.append(contenedor);
-        });
-
-        // Añadimos todos los elementos al DOM
-        zona.append(fragment);
-    } catch (error) {
-        console.error("Error al pintar las imágenes:", error);
-
-        if (zona) {
-            zona.innerHTML =
-                "<p>Ha ocurrido un error al cargar las fotografías.</p>";
-        }
-    }
-};
-
-// 3. Función para crear cada tarjeta de imagen
-const crearImagen = (imagen, zona, query) => {
-    // Creamos el article
-    const contenedor = document.createElement("article");
-
-    // Creamos el título
-    const titulo = document.createElement("h4");
-
-    // Comprobamos dónde vamos a mostrar la imagen, dependiendo de ello mostramos un titulo diferente en la imagen
-    if (zona !== gridFotosCategoria) {
-        // Si es una colleccion de las 3 de imagenes de arriba, mostramos el término de búsqueda como título, en mayuscula
-        titulo.textContent = query.toUpperCase();
-    } else {
-        // Si es una fotografía de la galería, mostramos su descripción
-        titulo.textContent = imagen.alt_description || "Sin título";
-    }
-
-    // Creamos la imagen
-    const img = document.createElement("img");
-    img.src = imagen.urls.small;
-    img.alt = imagen.alt_description || "Fotografía de Unsplash";
-    img.title = imagen.description || imagen.alt_description || "Sin título";
-
-    // Creamos el botón de favoritos
-    const botonFavorito = document.createElement("button");
-    botonFavorito.type = "button";
-    botonFavorito.classList.add("botonFavorito");
-
-    // Creamos el icono del corazón con font awesome
-    const corazon = document.createElement("i");
-    corazon.classList.add("fa-regular", "fa-heart");
-
-    // Añadimos el corazón al botón
-    botonFavorito.append(corazon);
-
-    // Añadimos los elementos al article
-    contenedor.append(titulo, img, botonFavorito);
-
-    // Devolvemos el article completo
-    return contenedor;
-};
-
-// 4. Ejecutamos la función 3 veces una por cada imagen
-pintarImagenes("nature", 1, 1, "landscape", img1);
-pintarImagenes("technology", 1, 1, "landscape", img2);
-pintarImagenes("people", 1, 1, "landscape", img3);
-
-//busqueda
+// EVENTOS
 
 formulario.addEventListener("submit", (event) => {
     // Evitamos que el formulario recargue la página
@@ -212,14 +78,19 @@ document.addEventListener("click", (ev) => {
         modalFavoritos.classList.add("ocultar");
     }
 
-    const clikCorazon = ev.target.closest(".botonFavorito");
-    const listaFavoritos = document.querySelector("#listaFavoritos");
-    if (clikCorazon) {
-        const id = clikCorazon.target.id;
-        const src = clikCorazon.target.src;
-        const alt = clikCorazon.target.alt;
-        const cajaFavoritos = pintarFavoritos({ id, src, alt });
-        cajaFavoritos.append(listaFavoritos);
+    const clickFavoritos = ev.target.closest(".botonFavorito");
+    if (clickFavoritos) {
+        const tarjeta = ev.target.closest("#gridFotosCategoria article");
+        const clikCorazon = tarjeta.querySelector("img");
+        const id = clikCorazon.id;
+        const src = clikCorazon.src;
+        const alt = clikCorazon.alt;
+        const title = clikCorazon.title;
+        aniadirFavorito(clikCorazon);
+        pintarFavoritos();
+        // console.log(id, src, alt);
+        // const cajaFavoritos = pintarFavoritos({ id, src, alt });
+        // cajaFavoritos.append(listaFavoritos);
 
         //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
     }
@@ -253,10 +124,13 @@ leerLocalStorage();
 ////////////////////////////////
 
 // guardarLocalStorage(favoritos);
+const buscarFavorito = (idImagen) => {
+    return favoritos.find(({ id }) => id === idImagen);
+};
 
-const aniadirFavorito = () => {
+const aniadirFavorito = (ObjetoImagen) => {
     const favoritoEncontrado = buscarFavorito(ObjetoImagen);
-    if (favoritoEncontrado) {
+    if (!favoritoEncontrado) {
         const nuevaImagen = {
             id: ObjetoImagen.id,
             src: ObjetoImagen.src,
@@ -264,19 +138,193 @@ const aniadirFavorito = () => {
             titulo: ObjetoImagen.title,
         };
         favoritos.push(nuevaImagen);
+        console.log(nuevaImagen);
     } else {
-          console.log("<p>La imagen ya existe</p>");
-            // return;
-        }
-    };
-    
-const pintarFavoritos = () => {
-    // console.log("pintando");
-    modalFavoritos.innerHTML = ""; // vaciar el contenedor
-    let favoritosLocal = leerLocalStorage();
-
-
-    
-
-    // const foreach
+        console.log("<p>La imagen ya existe</p>");
+        // return;
+    }
 };
+
+// const pintarFavoritos = (favoritos) => {
+//     // console.log("pintando");
+
+//     modalFavoritos.innerHTML = ""; // vaciar el contenedor
+//     if (favoritos.length === 0) {
+//         modalFavoritos.innerHTML =
+//             "<p>No has seleccionado una imagen favorita.</p>";
+//         return;
+//     } else {
+//         favoritos.forEach((imagenObj) => {
+//             const contenedorModal = crearImagenFavorito(imagenObj);
+//         });
+//     }
+// };
+
+function pintarFavoritos() {
+    // Limpiamos el contenido anterior
+
+    contenedor.innerHTML = "";
+
+    // Creamos un fragmento
+
+    const fragmento = document.createDocumentFragment();
+
+    // Recuperamos los favoritos de LocalStorage
+
+    favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+    // Recorremos los favoritos
+
+    favoritos.forEach((imagen) => {
+        // Creamos cada imagen reutilizando nuestra función
+
+        const elementoImagen = crearImagen(imagen);
+
+        fragmento.append(elementoImagen);
+    });
+
+    // Añadimos todas las imágenes al contenedor
+
+    contenedor.append(fragmento);
+}
+
+//console.log(select);
+// 1. Función para consultar la API
+const consultarApi = async (url) => {
+    try {
+        const respuesta = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization:
+                    "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
+            },
+        });
+
+        // Comprobamos si la respuesta es correcta
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP: ${respuesta.status}`);
+        }
+
+        // Convertimos la respuesta a JSON
+        const datos = await respuesta.json();
+
+        return datos;
+    } catch (error) {
+        console.log("Ha ocurrido un error:", error);
+    }
+};
+
+// 2. Función para pintar las imágenes
+
+const pintarImagenes = async (
+    query = "nature",
+    page = 1,
+    per_page = 16,
+    orientacion = "landscape",
+    zona = gridFotosCategoria,
+) => {
+    try {
+        // Comprobamos que existe el contenedor
+        if (!zona) {
+            throw new Error("No se encontró el contenedor de fotografías.");
+        }
+
+        // Esperamos a recibir los datos de la API
+        const datosRecibidos = await consultarApi(
+            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+        );
+
+        // Comprobamos que hemos recibido datos
+        if (!datosRecibidos) {
+            throw new Error("No se pudieron cargar las fotografías.");
+        }
+
+        // Obtenemos el array de fotografías
+        const fotos = datosRecibidos.results;
+
+        // Comprobamos que existen fotografías
+        if (fotos.length === 0) {
+            zona.innerHTML = "<p>No se encontraron fotografías.</p>";
+            return;
+        }
+
+        // Limpiamos las fotografías anteriores
+        zona.innerHTML = "";
+
+        // Recorremos el array de fotografías
+        fotos.forEach((imagenObj) => {
+            const contenedor = crearImagen(imagenObj, zona, query);
+            fragment.append(contenedor);
+        });
+
+        // Añadimos todos los elementos al DOM
+        zona.append(fragment);
+    } catch (error) {
+        console.error("Error al pintar las imágenes:", error);
+
+        if (zona) {
+            zona.innerHTML =
+                "<p>Ha ocurrido un error al cargar las fotografías.</p>";
+        }
+    }
+};
+
+// 3. Función para crear cada tarjeta de imagen
+const crearImagen = (imagen, zona, query) => {
+    // Creamos el article
+    const contenedor = document.createElement("article");
+
+    // Creamos el título
+    const titulo = document.createElement("h4");
+
+    // Comprobamos dónde vamos a mostrar la imagen, dependiendo de ello mostramos un titulo diferente en la imagen
+    if (zona !== gridFotosCategoria) {
+        // Si es una colleccion de las 3 de imagenes de arriba, mostramos el término de búsqueda como título, en mayuscula
+        titulo.textContent = query.toUpperCase();
+    } else {
+        // Si es una fotografía de la galería, mostramos su descripción
+        titulo.textContent = imagen.alt_description || "Sin título";
+    }
+
+    // Creamos la imagen
+    const img = document.createElement("img");
+    img.id = imagen.id;
+    img.src = imagen.urls.small;
+    img.alt = imagen.alt_description || "Fotografía de Unsplash";
+    img.title = imagen.description || imagen.alt_description || "Sin título";
+
+    // Creamos el botón de favoritos
+    const botonFavorito = document.createElement("button");
+    botonFavorito.type = "button";
+    botonFavorito.classList.add("botonFavorito");
+
+    // Creamos el icono del corazón con font awesome
+    const corazon = document.createElement("i");
+    corazon.classList.add("fa-regular", "fa-heart");
+
+    // Añadimos el corazón al botón
+    botonFavorito.append(corazon);
+
+    // Añadimos los elementos al article
+    contenedor.append(titulo, img, botonFavorito);
+
+    // Devolvemos el article completo
+    return contenedor;
+};
+
+const mostrarCategorias = () => {
+    // Recorremos el array de categorías
+    categorias.forEach((query) => {
+        // Creamos un contenedor para cada categoría
+        const contendorFotoCategoria = document.createElement("div");
+        // Guardamos el término de búsqueda
+        contendorFotoCategoria.dataset.query = query;
+        // Añadimos el contenedor al HTML
+        fragment.append(contendorFotoCategoria);
+        // Pintamos una fotografía dentro del contenedor
+        pintarImagenes(query, 1, 1, "landscape", contendorFotoCategoria);
+    });
+    categoria.append(fragment);
+};
+
+mostrarCategorias();
