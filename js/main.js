@@ -66,7 +66,7 @@ const pintarImagenes = async (
     query = "nature",
     page = 1,
     per_page = 16,
-    orientacion = "landscape",
+    orientacion = "",                       // "" = sin filtro: no se envía orientation y Unsplash devuelve todas
     zona = gridFotosCategoria,
 ) => {
     try {
@@ -75,9 +75,13 @@ const pintarImagenes = async (
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
-        // Esperamos a recibir los datos de la API
+        // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
+        let urlBusqueda = `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}`;
+        // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
+        // Pedimos a la API la dirección ya montada y esperamos los datos
+
         const datosRecibidos = await consultarApi(
-            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+            urlBusqueda,
         );
 
         // Comprobamos que hemos recibido datos
