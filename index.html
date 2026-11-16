@@ -4,41 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galeria del fotos API</title>
+    <title>Galeria de fotos API</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+    <!-- CSS propio -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
+
     <header>
-        <h1>Galeria del fotos API</h1>
+        <h1>Galería de fotos API</h1>
     </header>
 
     <main>
+
+        <!-- MENÚ DE BÚSQUEDA Y SELECTORES -->
         <section id="menuSelectores" class="menuSelectores">
-            <form action="" id="busqueda">
+
+            <form id="busqueda">
                 <input type="text" name="buscar" id="buscar" placeholder="Busca tu foto">
+
                 <button type="submit">Buscar</button>
             </form>
 
-            <button type="button">Mostrar Favoritos</button>
+            <button type="button" id="mostrarFavoritos">Mostrar Favoritos</button>
 
-            <label for="oritacionFotos">Fitro por orientación</label>
+            <label for="orientacionFoto">Filtro por orientación</label>
+
             <select name="orientacionFoto" id="orientacionFoto">
                 <option value="squarish">Cuadradas</option>
                 <option value="portrait">Verticales</option>
                 <option value="landscape" selected>Horizontales</option>
             </select>
-        </section>
-        <section id="categoria" class="categoria">
-            <button type="button">Naturaleza</button>
-            <button type="button">Tecnología</button>
-            <button type="button">Personas</button>
-        </section>
-        <section id="gridFotosCategoria" class="gridFotosCategoria">
 
         </section>
+
+        <!-- SECCIÓN DE COLECCIONES -->
+        <section id="seccionColecciones">
+
+            <h2 class="tituloSeccion">Explora nuestras colecciones</h2>
+
+            <div id="categoria" class="categoria">
+                <div id="img1" data-query="nature"></div>
+                <div id="img2" data-query="technology"></div>
+                <div id="img3" data-query="people"></div>
+            </div>
+
+        </section>
+
+        <!-- SECCIÓN DE FOTOGRAFÍAS -->
+        <section id="seccionFotografias">
+
+            <h2 class="tituloSeccion">Descubre nuestras fotografías</h2>
+
+            <div id="gridFotosCategoria" class="gridFotosCategoria">
+
+            </div>
+
+        </section>
+
         <section id="modalFavoritos" class="modalFavoritos ocultar">
-            <!-- Modal con los favitos con display none de base y un toggle que cambie la clase al hacer clic en favoritos -->
+
+            <button type="button" id="cerrarFavoritos" aria-label="Cerrar favoritos">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h2>Mis favoritos</h2>
+
+            <div id="listaFavoritos"></div>
+
         </section>
 
     </main>
@@ -48,6 +85,7 @@
     </footer>
 
     <script src="js/main.js"></script>
+
 </body>
 
 </html>
