@@ -201,6 +201,10 @@ header h1 {
    6. SECCIÓN DE FOTOGRAFÍAS
 ======================================== */
 
+/* ========================================
+   6. SECCIÓN DE FOTOGRAFÍAS
+======================================== */
+
 #seccionFotografias {
     max-width: 1400px;
     margin: 0 auto;
@@ -231,10 +235,30 @@ header h1 {
         box-shadow 0.3s ease;
 }
 
+/* IMÁGENES HORIZONTALES */
+
+#gridFotosCategoria.orientacion-horizontal article img {
+    aspect-ratio: 4 / 3;
+}
+
+/* IMÁGENES VERTICALES */
+
+#gridFotosCategoria.orientacion-vertical article img {
+    aspect-ratio: 3 / 4;
+}
+
+/* IMÁGENES CUADRADAS */
+
+#gridFotosCategoria.orientacion-cuadrada article img {
+    aspect-ratio: 1 / 1;
+}
+
+/* Estilos comunes de las imágenes */
+
 #gridFotosCategoria article img {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
+
     object-fit: cover;
 
     transition: transform 0.4s ease;
@@ -308,6 +332,8 @@ header h1 {
 #gridFotosCategoria article .botonFavorito.favorito {
     color: #ff4d5a;
 }
+
+/* Ocultamos favoritos en las portadas */
 
 .categoria .botonFavorito {
     display: none;

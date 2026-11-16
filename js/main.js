@@ -15,6 +15,7 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+
 // Creamos un fragmento para almacenar los elementos
 const fragment = document.createDocumentFragment();
 
@@ -27,7 +28,7 @@ const categorias = ["nature", "technology", "people"];
 
 // EVENTOS
 
-formulario.addEventListener("submit", (event) => {
+formulario.addEventListener("submit", async (event) => {
     // Evitamos que el formulario recargue la página
     event.preventDefault();
 
@@ -37,22 +38,37 @@ formulario.addEventListener("submit", (event) => {
     // Comprobamos que no esté vacío y guardamos el termino a buscar en queryActual
     if (textoBuscar !== "") {
         queryActual = textoBuscar;
-        pintarImagenes(textoBuscar);
+        await pintarImagenes(textoBuscar);
+        bajarAGaleria();
     }
 });
 
-// A la caja select, cuando cambie la opción, pido las fotos con esa orientación
-select.addEventListener("change", (ev) => {
-    //console.log("Ha cambiado la orientación de tu imagen");
-    // target es el objetivo (el select) y value el valor elegido: portrait, landscape o squarish
-    const orientacionElegida = ev.target.value;
-    //console.log(orientacionElegida);
-    // Pido a Unsplash la última búsqueda (queryActual) filtrada por la orientación elegida
-    pintarImagenes(queryActual, 1, 16, orientacionElegida);
+select.addEventListener("change", async () => {
+    const orientacion = select.value;
+
+    // Quitamos las clases anteriores
+    gridFotosCategoria.classList.remove(
+        "orientacion-horizontal",
+        "orientacion-vertical",
+        "orientacion-cuadrada",
+    );
+
+    // Añadimos la clase correspondiente
+    if (orientacion === "landscape") {
+        gridFotosCategoria.classList.add("orientacion-horizontal");
+    } else if (orientacion === "portrait") {
+        gridFotosCategoria.classList.add("orientacion-vertical");
+    } else if (orientacion === "squarish") {
+        gridFotosCategoria.classList.add("orientacion-cuadrada");
+    }
+
+    // Volvemos a consultar las fotografías
+    await pintarImagenes(queryActual, 1, 16, orientacion);
+
+    bajarAGaleria();
 });
 
-
-document.addEventListener("click", (ev) => {
+document.addEventListener("click", async (ev) => {
     // delegacion de eventos
     // closest() comprueba el elemento pulsado y después sus padres
     // Busca hacia elementos padres la imagen hasta encontrar el primer elemento que coincida con #categoria > div
@@ -61,7 +77,8 @@ document.addEventListener("click", (ev) => {
     if (categoriaDiv) {
         const query = categoriaDiv.dataset.query;
         queryActual = query;
-        pintarImagenes(query);
+        await pintarImagenes(query);
+        bajarAGaleria();
     }
 
     // Comprobar si hemos pulsado el botón de favoritos
@@ -77,9 +94,7 @@ document.addEventListener("click", (ev) => {
     if (cerrarFavoritos) {
         modalFavoritos.classList.add("ocultar");
     }
-
 });
-
 
 //console.log(select);
 // 1. Función para consultar la API
@@ -181,7 +196,7 @@ const crearImagen = (imagen, zona, query) => {
 
     // Creamos la imagen
     const img = document.createElement("img");
-    img.id = imagen.id
+    img.id = imagen.id;
     img.src = imagen.urls.small;
     img.alt = imagen.alt_description || "Fotografía de Unsplash";
     img.title = imagen.description || imagen.alt_description || "Sin título";
@@ -217,7 +232,14 @@ const mostrarCategorias = () => {
         // Pintamos una fotografía dentro del contenedor
         pintarImagenes(query, 1, 1, "landscape", contendorFotoCategoria);
     });
-    categoria.append(fragment)
+    categoria.append(fragment);
 };
 
-mostrarCategorias()
+const bajarAGaleria = () => {
+    document.querySelector("#seccionFotografias").scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+    });
+};
+
+mostrarCategorias();
