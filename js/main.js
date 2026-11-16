@@ -33,6 +33,17 @@ let orientacionActual = "";    // Orientación elegida en el select; "" = sin fi
 
 const categorias = ["nature", "technology", "people"];
 
+// Empieza una búsqueda desde cero: tema nuevo, página 1 y sin filtro de orientación (lo pidió Héctor)
+const nuevaBusqueda = async (tema) => {
+    queryActual = tema;
+    paginaActual = 1;
+    orientacionActual = "";
+    select.value = "";      // el select vuelve a «Selecciona una opción»
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    bajarAGaleria();
+};
+
+
 // EVENTOS
 
 formulario.addEventListener("submit", async (event) => {
@@ -44,15 +55,15 @@ formulario.addEventListener("submit", async (event) => {
 
     // Comprobamos que no esté vacío y guardamos el termino a buscar en queryActual
     if (textoBuscar !== "") {
-        queryActual = textoBuscar;
-        await pintarImagenes(textoBuscar);
-        bajarAGaleria();
+        await nuevaBusqueda(textoBuscar);
     }
 });
 
-select.addEventListener("change", async () => {
-    const orientacion = select.value;
-
+    select.addEventListener("change", async () => {
+        const orientacion = select.value;
+        orientacionActual = orientacion;   // lo apuntamos para que Siguiente y Anterior lo sepan
+        paginaActual = 1;                  // otra orientación = otro montón de fotos: se empieza por la 1
+  
     // Quitamos las clases anteriores
     gridFotosCategoria.classList.remove(
         "orientacion-horizontal",
@@ -70,9 +81,24 @@ select.addEventListener("change", async () => {
     }
 
     // Volvemos a consultar las fotografías
-    await pintarImagenes(queryActual, 1, 16, orientacion);
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
 
     bajarAGaleria();
+});
+// Siguiente: pasamos de página y pedimos las fotos del mismo tema y orientación
+pagSiguiente.addEventListener("click", async () => {
+    paginaActual++;
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    bajarAGaleria();
+});
+
+// Anterior: igual, pero restando; la página 0 no existe, así que en la 1 no hace nada
+pagAnterior.addEventListener("click", async () => {
+    if (paginaActual > 1) {
+        paginaActual--;
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+        bajarAGaleria();
+    }
 });
 
 document.addEventListener("click", async (ev) => {
@@ -82,10 +108,7 @@ document.addEventListener("click", async (ev) => {
     const categoriaDiv = ev.target.closest("#categoria > div");
 
     if (categoriaDiv) {
-        const query = categoriaDiv.dataset.query;
-        queryActual = query;
-        await pintarImagenes(query);
-        bajarAGaleria();
+        await nuevaBusqueda(categoriaDiv.dataset.query);
     }
 
     // Comprobar si hemos pulsado el botón de favoritos
