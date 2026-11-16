@@ -275,5 +275,8 @@ const pintarFavoritos = () => {
     modalFavoritos.innerHTML = ""; // vaciar el contenedor
     let favoritosLocal = leerLocalStorage();
 
+
+    
+
     // const foreach
 };
