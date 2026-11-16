@@ -105,87 +105,6 @@ document.addEventListener("click", (ev) => {
     }
 });
 
-///////////////////
-//FUNCIONES DE LOCAL STORAGE
-////////////////////
-
-const leerLocalStorage = () => {
-    const leerFavorito =
-        JSON.parse(localStorage.getItem("favoritosFotos")) || [];
-    // console.log("favo ", leerFavorito);
-    return leerFavorito;
-};
-
-let favoritos = leerLocalStorage();
-
-const guardarLocalStorage = (favoritos) => {
-    // la lista que entrara en el input y cambiarla con strinfy a texto
-    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
-    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
-
-    console.log("favv", favoritos);
-};
-
-///////////////////////////////
-// FUNCION GUARADAR FAVORITOS Y PINTAR
-////////////////////////////////
-
-const buscarFavorito = (idImagen) => {
-    return favoritos.find(({ id }) => id === idImagen);
-};
-
-const aniadirFavorito = (ObjetoImagen) => {
-    console.log(typeof ObjetoImagen);
-    const favoritoEncontrado = buscarFavorito(ObjetoImagen.id);
-    if (!favoritoEncontrado) {
-        const nuevaImagen = {
-            id: ObjetoImagen.id,
-            src: ObjetoImagen.src,
-            alt: ObjetoImagen.alt,
-            titulo: ObjetoImagen.title,
-        };
-        favoritos.push(nuevaImagen);
-
-        // console.log(nuevaImagen);
-    } else {
-        console.log("<p>La imagen ya existe</p>");
-        // return;
-    }
-    guardarLocalStorage(favoritos);
-};
-
-const pintarFavoritos = () => {
-    // console.log("pintando");
-    contenedor.innerHTML = ""; // vaciar el contenedor
-    // Creamos un fragmento
-    const fragmento = document.createDocumentFragment();
-    if (favoritos.length === 0) {
-        contenedor.innerHTML =
-            "<p>No has seleccionado una imagen favorita.</p>";
-        return;
-    } else {
-        // Recorremos los favoritos
-        favoritos.forEach((imagen) => {
-            // Creamos cada imagen reutilizando nuestra función
-            const elementoImagen = crearFavorito(imagen);
-            fragmento.append(elementoImagen);
-        });
-        // Añadimos todas las imágenes al contenedor
-        contenedor.append(fragmento);
-    }
-};
-
-const crearFavorito = (imagen) => {
-    const cajaFavorito = document.createElement("article");
-    const titulofavorito = document.createElement("h4");
-    titulofavorito.textContent = imagen.titulo;
-    const img = document.createElement("img");
-    img.src = imagen.src;
-    img.alt = imagen.alt;
-    cajaFavorito.append(titulofavorito, img);
-    return cajaFavorito;
-};
-
 // 1. Función para consultar la API
 const consultarApi = async (url) => {
     try {
@@ -329,6 +248,88 @@ const bajarAGaleria = () => {
         behavior: "smooth",
         block: "start",
     });
+};
+
+
+///////////////////
+//FUNCIONES DE LOCAL STORAGE
+////////////////////
+
+const leerLocalStorage = () => {
+    const leerFavorito =
+        JSON.parse(localStorage.getItem("favoritosFotos")) || [];
+    // console.log("favo ", leerFavorito);
+    return leerFavorito;
+};
+
+let favoritos = leerLocalStorage();
+
+const guardarLocalStorage = (favoritos) => {
+    // la lista que entrara en el input y cambiarla con strinfy a texto
+    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
+    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
+
+    console.log("favv", favoritos);
+};
+
+///////////////////////////////
+// FUNCION GUARADAR FAVORITOS Y PINTAR
+////////////////////////////////
+
+const buscarFavorito = (idImagen) => {
+    return favoritos.find(({ id }) => id === idImagen);
+};
+
+const aniadirFavorito = (ObjetoImagen) => {
+    console.log(typeof ObjetoImagen);
+    const favoritoEncontrado = buscarFavorito(ObjetoImagen.id);
+    if (!favoritoEncontrado) {
+        const nuevaImagen = {
+            id: ObjetoImagen.id,
+            src: ObjetoImagen.src,
+            alt: ObjetoImagen.alt,
+            titulo: ObjetoImagen.title,
+        };
+        favoritos.push(nuevaImagen);
+
+        // console.log(nuevaImagen);
+    } else {
+        console.log("<p>La imagen ya existe</p>");
+        // return;
+    }
+    guardarLocalStorage(favoritos);
+};
+
+const pintarFavoritos = () => {
+    // console.log("pintando");
+    contenedor.innerHTML = ""; // vaciar el contenedor
+    // Creamos un fragmento
+    const fragmento = document.createDocumentFragment();
+    if (favoritos.length === 0) {
+        contenedor.innerHTML =
+            "<p>No has seleccionado una imagen favorita.</p>";
+        return;
+    } else {
+        // Recorremos los favoritos
+        favoritos.forEach((imagen) => {
+            // Creamos cada imagen reutilizando nuestra función
+            const elementoImagen = crearFavorito(imagen);
+            fragmento.append(elementoImagen);
+        });
+        // Añadimos todas las imágenes al contenedor
+        contenedor.append(fragmento);
+    }
+};
+
+const crearFavorito = (imagen) => {
+    const cajaFavorito = document.createElement("article");
+    const titulofavorito = document.createElement("h4");
+    titulofavorito.textContent = imagen.titulo;
+    const img = document.createElement("img");
+    img.src = imagen.src;
+    img.alt = imagen.alt;
+    cajaFavorito.append(titulofavorito, img);
+    return cajaFavorito;
 };
 
 mostrarCategorias();
