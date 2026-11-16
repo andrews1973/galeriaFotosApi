@@ -192,3 +192,20 @@ if (botonFavorito) {
     //pendiente funcion de pintar favoritos y el segundo es el uso de pintargrid ya tenia para dibujar las fotos alli
   });
 }
+
+const favoritos = () => {
+let favoritosLocal = leerLocalStorage();
+
+ if (existe) {
+                favoritosLocal.forEach(element => {
+                    pintarFavoritos(element); // sera la funcion de pintar en el modal 
+                });
+            } else {
+                favoritosLocal.forEach(element => {
+                    pintarFavoritos(element); // sera la funcion de pintar en el modal 
+                });
+            }
+        });
+
+        guardarLocalStorage(favoritos);
+// container.innerHTML = '';
