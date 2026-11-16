@@ -41,13 +41,14 @@ const categorias = ["nature", "technology", "people"];
  * nuevaBusqueda("technology"); // galería de tecnología, página 1, todas las orientaciones
  */
 const nuevaBusqueda = async (tema) => {
-    queryActual = tema;
-    paginaActual = 1;
-    orientacionActual = "";
+    queryActual = tema;         // apuntamos el tema nuevo para que Siguiente y Anterior lo sepan
+    paginaActual = 1;           // toda búsqueda nueva empieza en la página 1
+    orientacionActual = "";     // y sin filtro de orientación: salen todas
     select.value = "";      // el select vuelve a «Selecciona una opción»
     // La galería vuelve a su aspecto de partida (el del index.html), para que no se quede en vertical o cuadrada
     gridFotosCategoria.classList.remove("orientacion-vertical", "orientacion-cuadrada");
     gridFotosCategoria.classList.add("orientacion-horizontal");
+    // Pedimos las 16 fotos a la API y bajamos la pantalla hasta la galería
     await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
     bajarAGaleria();
 };
@@ -68,11 +69,12 @@ formulario.addEventListener("submit", async (event) => {
     }
 });
 
-    select.addEventListener("change", async () => {
-        const orientacion = select.value;
-        orientacionActual = orientacion;   // lo apuntamos para que Siguiente y Anterior lo sepan
-        paginaActual = 1;                  // otra orientación = otro montón de fotos: se empieza por la 1
-  
+// Select de orientación: al elegir una opción, filtramos la galería
+select.addEventListener("change", async () => {
+    const orientacion = select.value;  // leemos la opción elegida (landscape, portrait o squarish)
+    orientacionActual = orientacion;   // lo apuntamos para que Siguiente y Anterior lo sepan
+    paginaActual = 1;                  // otra orientación = otro montón de fotos: se empieza por la 1
+
     // Quitamos las clases anteriores
     gridFotosCategoria.classList.remove(
         "orientacion-horizontal",
@@ -96,7 +98,7 @@ formulario.addEventListener("submit", async (event) => {
 });
 // Siguiente: pasamos de página y pedimos las fotos del mismo tema y orientación
 pagSiguiente.addEventListener("click", async () => {
-    paginaActual++;
+    paginaActual++;     // sumamos 1 a la página
     await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
     bajarAGaleria();
 });
@@ -104,7 +106,7 @@ pagSiguiente.addEventListener("click", async () => {
 // Anterior: igual, pero restando; la página 0 no existe, así que en la 1 no hace nada
 pagAnterior.addEventListener("click", async () => {
     if (paginaActual > 1) {
-        paginaActual--;
+        paginaActual--;     // restamos 1 a la página
         await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
         bajarAGaleria();
     }
@@ -176,7 +178,7 @@ const pintarImagenes = async (
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
-                // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
+        // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
         let urlBusqueda = `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}`;
         // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
 
