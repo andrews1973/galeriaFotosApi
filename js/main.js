@@ -1,7 +1,7 @@
 // URL base de la API
 const baseUrl = "https://api.unsplash.com/";
 
-let queryActual = ""; // Search term, para guardar la busqueda
+let queryActual = "nature"; // Search term, para guardar la busqueda
 
 //const orientacion = "landscape"; // orientation=landscape, portrait, squarish
 //const query = ""; // Search term
@@ -176,10 +176,10 @@ formulario.addEventListener("submit", (event) => {
 
 // A la caja select, cuando cambie la opción, pido las fotos con esa orientación
 select.addEventListener("change", (ev) => {
-    // console.log("Ha cambiado la orientación de tu imagen");
+    //console.log("Ha cambiado la orientación de tu imagen");
     // target es el objetivo (el select) y value el valor elegido: portrait, landscape o squarish
     const orientacionElegida = ev.target.value;
-    // console.log(orientacionElegida);
+    //console.log(orientacionElegida);
     // Pido a Unsplash la última búsqueda (queryActual) filtrada por la orientación elegida
     pintarImagenes(queryActual, 1, 16, orientacionElegida);
 });
