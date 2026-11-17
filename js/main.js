@@ -18,6 +18,8 @@ const modalFavoritos = document.querySelector("#modalFavoritos");
 // Botones de la paginación (debajo de la galería)
 const pagAnterior = document.querySelector("#paginaAnterior");
 const pagSiguiente = document.querySelector("#paginaSiguiente");
+// Hueco entre los dos botones donde escribimos el tema y la página en la que estamos
+const numeroPagina = document.querySelector("#numeroPagina");
 // console.log(pagAnterior, pagSiguiente);
 
 
@@ -32,6 +34,17 @@ let paginaActual = 1;          // Página en la que vamos; toda búsqueda empiez
 let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
 
 const categorias = ["nature", "technology", "people"];
+
+/**
+ * Escribe entre los botones Anterior y Siguiente el tema y la página que se están viendo.
+ * Se llama cada vez que cambia la galería: búsqueda, categoría, orientación, Siguiente y Anterior.
+ * @example
+ * // con queryActual = "gatos" y paginaActual = 3
+ * mostrarPagina(); // escribe «GATOS · Página 3»
+ */
+const mostrarPagina = () => {
+    numeroPagina.textContent = `${queryActual.toUpperCase()} · Página ${paginaActual}`;
+};
 
 /**
  * Empieza una búsqueda desde cero (lo pidió Héctor): tema nuevo, página 1 y sin filtro de orientación.
@@ -50,6 +63,7 @@ const nuevaBusqueda = async (tema) => {
     gridFotosCategoria.classList.add("orientacion-horizontal");
     // Pedimos las 16 fotos a la API y bajamos la pantalla hasta la galería
     await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();            // escribimos el tema nuevo y la página 1
     bajarAGaleria();
 };
 
@@ -93,6 +107,7 @@ select.addEventListener("change", async () => {
 
     // Volvemos a consultar las fotografías
         await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();    // mismo tema, pero vuelve a la página 1
 
     bajarAGaleria();
 });
@@ -100,6 +115,7 @@ select.addEventListener("change", async () => {
 pagSiguiente.addEventListener("click", async () => {
     paginaActual++;     // sumamos 1 a la página
     await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();    // escribimos la página nueva
     bajarAGaleria();
 });
 
@@ -108,6 +124,7 @@ pagAnterior.addEventListener("click", async () => {
     if (paginaActual > 1) {
         paginaActual--;     // restamos 1 a la página
         await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+        mostrarPagina();    // escribimos la página nueva
         bajarAGaleria();
     }
 });
