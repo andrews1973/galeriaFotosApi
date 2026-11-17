@@ -5,7 +5,17 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
+<<<<<<< HEAD
 const listaFavoritos = document.querySelector("#listaFavoritos");
+=======
+// Botones de la paginación (debajo de la galería)
+const pagAnterior = document.querySelector("#paginaAnterior");
+const pagSiguiente = document.querySelector("#paginaSiguiente");
+// Hueco entre los dos botones donde escribimos el tema y la página en la que estamos
+const numeroPagina = document.querySelector("#numeroPagina");
+// console.log(pagAnterior, pagSiguiente);
+
+>>>>>>> feature/paginacion2
 
 const fragment = document.createDocumentFragment();
 
@@ -13,11 +23,48 @@ const fragment = document.createDocumentFragment();
 const baseUrl = "https://api.unsplash.com/";
 
 let queryActual = "nature"; // Search term, para guardar la busqueda
+let paginaActual = 1;          // Página en la que vamos; toda búsqueda empieza en la 1
+let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
 
 const categorias = ["nature", "technology", "people"];
 
+<<<<<<< HEAD
 // Recuperamos los favoritos guardados en LocalStorage
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+=======
+/**
+ * Escribe entre los botones Anterior y Siguiente el tema y la página que se están viendo.
+ * Se llama cada vez que cambia la galería: búsqueda, categoría, orientación, Siguiente y Anterior.
+ * @example
+ * // con queryActual = "gatos" y paginaActual = 3
+ * mostrarPagina(); // escribe «GATOS · Página 3»
+ */
+const mostrarPagina = () => {
+    numeroPagina.textContent = `${queryActual.toUpperCase()} · Página ${paginaActual}`;
+};
+
+/**
+ * Empieza una búsqueda desde cero (lo pidió Héctor): tema nuevo, página 1 y sin filtro de orientación.
+ * La usan el buscador y las tres categorías de arriba.
+ * @param {string} tema - Palabra que se busca en Unsplash (por ejemplo "nature" o lo escrito en el buscador).
+ * @example
+ * nuevaBusqueda("technology"); // galería de tecnología, página 1, todas las orientaciones
+ */
+const nuevaBusqueda = async (tema) => {
+    queryActual = tema;         // apuntamos el tema nuevo para que Siguiente y Anterior lo sepan
+    paginaActual = 1;           // toda búsqueda nueva empieza en la página 1
+    orientacionActual = "";     // y sin filtro de orientación: salen todas
+    select.value = "";      // el select vuelve a «Selecciona una opción»
+    // La galería vuelve a su aspecto de partida (el del index.html), para que no se quede en vertical o cuadrada
+    gridFotosCategoria.classList.remove("orientacion-vertical", "orientacion-cuadrada");
+    gridFotosCategoria.classList.add("orientacion-horizontal");
+    // Pedimos las 16 fotos a la API y bajamos la pantalla hasta la galería
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();            // escribimos el tema nuevo y la página 1
+    bajarAGaleria();
+};
+
+>>>>>>> feature/paginacion2
 
 // EVENTOS
 
@@ -27,15 +74,22 @@ formulario.addEventListener("submit", async (event) => {
     const textoBuscar = inputBuscar.value.trim();
 
     if (textoBuscar !== "") {
+<<<<<<< HEAD
         queryActual = textoBuscar;
         await pintarImagenes(textoBuscar);
         bajarAGaleria();
         // bajamos a las imagenes
+=======
+        await nuevaBusqueda(textoBuscar);
+>>>>>>> feature/paginacion2
     }
 });
 
+// Select de orientación: al elegir una opción, filtramos la galería
 select.addEventListener("change", async () => {
-    const orientacion = select.value;
+    const orientacion = select.value;  // leemos la opción elegida (landscape, portrait o squarish)
+    orientacionActual = orientacion;   // lo apuntamos para que Siguiente y Anterior lo sepan
+    paginaActual = 1;                  // otra orientación = otro montón de fotos: se empieza por la 1
 
     // resteamos las clases
     gridFotosCategoria.classList.remove(
@@ -52,9 +106,33 @@ select.addEventListener("change", async () => {
         gridFotosCategoria.classList.add("orientacion-cuadrada");
     }
 
+<<<<<<< HEAD
     // Esperamos a que se pinten
     await pintarImagenes(queryActual, 1, 16, orientacion);
+=======
+    // Volvemos a consultar las fotografías
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();    // mismo tema, pero vuelve a la página 1
+
+>>>>>>> feature/paginacion2
     bajarAGaleria();
+});
+// Siguiente: pasamos de página y pedimos las fotos del mismo tema y orientación
+pagSiguiente.addEventListener("click", async () => {
+    paginaActual++;     // sumamos 1 a la página
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+    mostrarPagina();    // escribimos la página nueva
+    bajarAGaleria();
+});
+
+// Anterior: igual, pero restando; la página 0 no existe, así que en la 1 no hace nada
+pagAnterior.addEventListener("click", async () => {
+    if (paginaActual > 1) {
+        paginaActual--;     // restamos 1 a la página
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+        mostrarPagina();    // escribimos la página nueva
+        bajarAGaleria();
+    }
 });
 
 document.addEventListener("click", async (ev) => {
@@ -62,11 +140,15 @@ document.addEventListener("click", async (ev) => {
     const categoriaDiv = ev.target.closest("#categoria > div");
 
     if (categoriaDiv) {
+<<<<<<< HEAD
         const query = categoriaDiv.dataset.query;
         queryActual = query;
 
         await pintarImagenes(query);
         bajarAGaleria();
+=======
+        await nuevaBusqueda(categoriaDiv.dataset.query);
+>>>>>>> feature/paginacion2
     }
 
     // Mostrar favoritos
@@ -150,7 +232,7 @@ const pintarImagenes = async (
     query = "nature",
     page = 1,
     per_page = 16,
-    orientacion = "landscape",
+    orientacion = "",               // "" = sin filtro: no se envía orientation y Unsplash devuelve todas
     zona = gridFotosCategoria,
 ) => {
     try {
@@ -158,8 +240,23 @@ const pintarImagenes = async (
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
+<<<<<<< HEAD
         const datosRecibidos = await consultarApi(
             `${baseUrl}search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+=======
+        // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
+        let urlBusqueda = `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}`;
+        // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
+
+        // Si hay una orientación elegida, la pegamos al final de la dirección
+        if (orientacion !== "") {
+            urlBusqueda += `&orientation=${orientacion}`;
+        }
+
+        // Pedimos a la API la dirección ya montada y esperamos los datos
+        const datosRecibidos = await consultarApi(
+            urlBusqueda,
+>>>>>>> feature/paginacion2
         );
 
         if (!datosRecibidos) {
