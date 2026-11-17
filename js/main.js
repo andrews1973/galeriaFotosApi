@@ -1,13 +1,3 @@
-// Naturaleza
-// pintarImagenes('nature', 1, 1);
-// https://api.unsplash.com/search/photos?query=nature&per_page=1
-// Tecnología
-// https://api.unsplash.com/search/photos?query=technology&per_page=1
-// pintarImagenes('technology', 1, 1);
-// Personas
-// https://api.unsplash.com/search/photos?query=people&per_page=1
-// pintarImagenes('people', 1, 1);
-
 // querySelector
 const select = document.querySelector("#orientacionFoto");
 const categoria = document.querySelector("#categoria");
@@ -15,8 +5,8 @@ const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
 const modalFavoritos = document.querySelector("#modalFavoritos");
-const contenedor = document.querySelector("#listaFavoritos");
-// Creamos un fragmento para almacenar los elementos
+const listaFavoritos = document.querySelector("#listaFavoritos");
+
 const fragment = document.createDocumentFragment();
 
 // URL base de la API
@@ -26,34 +16,34 @@ let queryActual = "nature"; // Search term, para guardar la busqueda
 
 const categorias = ["nature", "technology", "people"];
 
+// Recuperamos los favoritos guardados en LocalStorage
+let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
 // EVENTOS
 
 formulario.addEventListener("submit", async (event) => {
-    // Evitamos que el formulario recargue la página
     event.preventDefault();
 
-    // Obtenemos el valor del input
     const textoBuscar = inputBuscar.value.trim();
 
-    // Comprobamos que no esté vacío y guardamos el termino a buscar en queryActual
     if (textoBuscar !== "") {
         queryActual = textoBuscar;
         await pintarImagenes(textoBuscar);
         bajarAGaleria();
+        // bajamos a las imagenes
     }
 });
 
 select.addEventListener("change", async () => {
     const orientacion = select.value;
 
-    // Quitamos las clases anteriores
+    // resteamos las clases
     gridFotosCategoria.classList.remove(
         "orientacion-horizontal",
         "orientacion-vertical",
         "orientacion-cuadrada",
     );
 
-    // Añadimos la clase correspondiente
     if (orientacion === "landscape") {
         gridFotosCategoria.classList.add("orientacion-horizontal");
     } else if (orientacion === "portrait") {
@@ -62,46 +52,73 @@ select.addEventListener("change", async () => {
         gridFotosCategoria.classList.add("orientacion-cuadrada");
     }
 
-    // Volvemos a consultar las fotografías
+    // Esperamos a que se pinten
     await pintarImagenes(queryActual, 1, 16, orientacion);
-
     bajarAGaleria();
 });
 
-document.addEventListener("click", (ev) => {
-    // delegacion de eventos
-    // closest() comprueba el elemento pulsado y después sus padres
-    // Busca hacia elementos padres la imagen hasta encontrar el primer elemento que coincida con #categoria > div
+document.addEventListener("click", async (ev) => {
+    // Seleccionar una categoría
     const categoriaDiv = ev.target.closest("#categoria > div");
 
     if (categoriaDiv) {
         const query = categoriaDiv.dataset.query;
         queryActual = query;
+
         await pintarImagenes(query);
         bajarAGaleria();
     }
 
-    // Comprobar si hemos pulsado el botón de favoritos
-    const botonFavoritos = ev.target.closest("#mostrarFavoritos");
+    // Mostrar favoritos
+    const botonMostrarFavoritos = ev.target.closest("#mostrarFavoritos");
 
-    if (botonFavoritos) {
-        modalFavoritos.classList.toggle("ocultar");
+    if (botonMostrarFavoritos) {
+        pintarFavoritos();
+        modalFavoritos.classList.remove("ocultar");
     }
 
-    // Comprobar si hemos pulsado el botón de cerrar favoritos
+    // Cerrar favoritos
     const cerrarFavoritos = ev.target.closest("#cerrarFavoritos");
 
     if (cerrarFavoritos) {
         modalFavoritos.classList.add("ocultar");
     }
-    // Evento de agragar favoritos
-    const clickFavoritos = ev.target.closest(".botonFavorito");
-    if (clickFavoritos) {
-        const tarjeta = ev.target.closest("#gridFotosCategoria article");
-        if (!tarjeta) return;
-        const imagen = tarjeta.querySelector("img");
-        aniadirFavorito(imagen);
-        pintarFavoritos();
+
+    // Añadir o eliminar un favorito,
+    // estamos buscando el botón de favoritos desde el elemento donde se ha producido el clic
+    const botonFavorito = ev.target.closest(".botonFavorito");
+
+    if (botonFavorito) {
+        // Busca hacia arriba en el HTML
+        // Buscamos el article que tenga ese botón
+        const tarjeta = botonFavorito.closest("article");
+
+        // Recuperamos la imagen que contiene el article
+        const img = tarjeta.querySelector("img");
+
+        // Recuperamos los datos de la imagen desde el propio img
+        const imagen = {
+            id: img.dataset.id,
+            urls: {
+                small: img.src,
+            },
+            alt_description: img.alt,
+        };
+
+        // Añadimos o eliminamos el favorito
+        alternarFavorito(imagen);
+
+        // Comprobamos si ahora es favorita
+        const esFavorita = buscarEnFavoritos(imagen);
+
+        // Actualizamos los corazones de todas las tarjetas que contengan esa imagen,
+        // en lugar de volver a pintar toda la galería pintarImagenes(queryActual);
+        actualizarCorazones(imagen.id, esFavorita);
+
+        // Si estamos dentro de la lista de favoritos, la volvemos a pintar pero funcion pintarFavoritos
+        if (listaFavoritos.contains(tarjeta)) {
+            pintarFavoritos();
+        }
     }
 });
 
@@ -116,22 +133,19 @@ const consultarApi = async (url) => {
             },
         });
 
-        // Comprobamos si la respuesta es correcta
         if (!respuesta.ok) {
             throw new Error(`Error HTTP: ${respuesta.status}`);
         }
 
-        // Convertimos la respuesta a JSON
         const datos = await respuesta.json();
-
         return datos;
     } catch (error) {
         console.log("Ha ocurrido un error:", error);
+        throw error;
     }
 };
 
 // 2. Función para pintar las imágenes
-
 const pintarImagenes = async (
     query = "nature",
     page = 1,
@@ -140,40 +154,32 @@ const pintarImagenes = async (
     zona = gridFotosCategoria,
 ) => {
     try {
-        // Comprobamos que existe el contenedor
         if (!zona) {
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
-        // Esperamos a recibir los datos de la API
         const datosRecibidos = await consultarApi(
-            `${baseUrl}search/photos?query=${query}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
+            `${baseUrl}search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}&orientation=${orientacion}`,
         );
 
-        // Comprobamos que hemos recibido datos
         if (!datosRecibidos) {
             throw new Error("No se pudieron cargar las fotografías.");
         }
 
-        // Obtenemos el array de fotografías
         const fotos = datosRecibidos.results;
 
-        // Comprobamos que existen fotografías
         if (fotos.length === 0) {
             zona.innerHTML = "<p>No se encontraron fotografías.</p>";
             return;
         }
 
-        // Limpiamos las fotografías anteriores
         zona.innerHTML = "";
 
-        // Recorremos el array de fotografías
         fotos.forEach((imagenObj) => {
             const contenedor = crearImagen(imagenObj, zona, query);
             fragment.append(contenedor);
         });
 
-        // Añadimos todos los elementos al DOM
         zona.append(fragment);
     } catch (error) {
         console.error("Error al pintar las imágenes:", error);
@@ -185,64 +191,135 @@ const pintarImagenes = async (
     }
 };
 
+// funcion que busca si el favorito ya existe, podria ser find()
+const buscarEnFavoritos = (imagen) => {
+    return favoritos.some((foto) => foto.id === imagen.id);
+};
+
 // 3. Función para crear cada tarjeta de imagen
 const crearImagen = (imagen, zona, query) => {
-    // Creamos el article
     const contenedor = document.createElement("article");
 
-    // Creamos el título
     const titulo = document.createElement("h4");
 
-    // Comprobamos dónde vamos a mostrar la imagen, dependiendo de ello mostramos un titulo diferente en la imagen
-    if (zona !== gridFotosCategoria) {
-        // Si es una colleccion de las 3 de imagenes de arriba, mostramos el término de búsqueda como título, en mayuscula
-        titulo.textContent = query.toUpperCase();
-    } else {
-        // Si es una fotografía de la galería, mostramos su descripción
+    if (zona === gridFotosCategoria || zona === listaFavoritos) {
         titulo.textContent = imagen.alt_description || "Sin título";
+    } else {
+        titulo.textContent = query.toUpperCase();
     }
 
-    // Creamos la imagen
     const img = document.createElement("img");
-    img.id = imagen.id;
     img.src = imagen.urls.small;
     img.alt = imagen.alt_description || "Fotografía de Unsplash";
     img.title = imagen.description || imagen.alt_description || "Sin título";
+
+    // Guardamos los datos de la imagen directamente en el img
+    img.dataset.id = imagen.id;
 
     // Creamos el botón de favoritos
     const botonFavorito = document.createElement("button");
     botonFavorito.type = "button";
     botonFavorito.classList.add("botonFavorito");
 
-    // Creamos el icono del corazón con font awesome
-    const corazon = document.createElement("i");
-    corazon.classList.add("fa-regular", "fa-heart");
+    // Comprobamos si la imagen ya está guardada como favorita, devulve true o false
+    const esFavorita = buscarEnFavoritos(imagen);
 
-    // Añadimos el corazón al botón
+    // font awesome el icono corazon nos fijamos en html para crearlo
+    const corazon = document.createElement("i");
+
+    if (esFavorita) {
+        botonFavorito.classList.add("favorito");
+        corazon.classList.add("fa-solid", "fa-heart");
+    } else {
+        corazon.classList.add("fa-regular", "fa-heart");
+    }
+
     botonFavorito.append(corazon);
 
-    // Añadimos los elementos al article
     contenedor.append(titulo, img, botonFavorito);
 
-    // Devolvemos el article completo
     return contenedor;
 };
 
-const mostrarCategorias = () => {
-    // Recorremos el array de categorías
-    categorias.forEach((query) => {
-        // Creamos un contenedor para cada categoría
-        const contendorFotoCategoria = document.createElement("div");
-        // Guardamos el término de búsqueda
-        contendorFotoCategoria.dataset.query = query;
-        // Añadimos el contenedor al HTML
-        fragment.append(contendorFotoCategoria);
-        // Pintamos una fotografía dentro del contenedor
-        pintarImagenes(query, 1, 1, "landscape", contendorFotoCategoria);
-    });
-    categoria.append(fragment);
+// 4. Función para alternar un favorito, pinchando en el corazon y voliendo o no a pinchar
+const alternarFavorito = (imagen) => {
+    // Comprobamos si ya existe en favoritos
+    const existe = buscarEnFavoritos(imagen);
+
+    if (existe) {
+        // Si existe, lo eliminamos, devuelve un array donde ya no esta ese favorito
+        favoritos = favoritos.filter((foto) => foto.id !== imagen.id);
+    } else {
+        // Si no existe, lo añadimos a nuestro array
+        favoritos.push(imagen);
+    }
+
+    // Guardamos los cambios en LocalStorage
+    localStorage.setItem("favoritos", JSON.stringify(favoritos));
 };
 
+// 5. Función para actualizar los corazones
+// una misma fotografía puede aparecer en distintos sitios:
+// por ejemplo, en una categoría y también en los resultados de búsqueda.
+// mantener sincronizada la parte visual con el contenido del array favoritos
+// evitamos volver a pintar toda la galería cada vez que añadimos o eliminamos un favorito
+const actualizarCorazones = (id, esFavorita) => {
+    // Buscamos todas las tarjetas que tengan ese ID
+    const tarjetas = document.querySelectorAll("article");
+
+    tarjetas.forEach((tarjeta) => {
+        const img = tarjeta.querySelector("img");
+
+        if (img && img.dataset.id === id) {
+            const boton = tarjeta.querySelector(".botonFavorito");
+            const corazon = boton.querySelector("i");
+
+            boton.classList.toggle("favorito", esFavorita);
+            corazon.classList.toggle("fa-solid", esFavorita);
+            corazon.classList.toggle("fa-regular", !esFavorita);
+        }
+    });
+};
+
+// 6. Función para pintar los favoritos en el modal
+const pintarFavoritos = () => {
+    listaFavoritos.innerHTML = "";
+
+    if (favoritos.length === 0) {
+        listaFavoritos.textContent = "Todavía no tienes favoritos.";
+        return;
+    }
+
+    favoritos.forEach((foto) => {
+        const contenedor = crearImagen(foto, listaFavoritos, "");
+        fragment.append(contenedor);
+    });
+
+    listaFavoritos.append(fragment);
+};
+
+// 7. Función para mostrar las categorías
+const mostrarCategorias = () => {
+    categorias.forEach((query) => {
+        const contendorFotoCategoria = document.createElement("div");
+
+        contendorFotoCategoria.dataset.query = query;
+
+        fragment.append(contendorFotoCategoria);
+    });
+
+    // Primero añadimos los contenedores al DOM
+    categoria.append(fragment);
+
+    // Después cargamos las imágenes de cada categoría
+    categorias.forEach((query) => {
+        const contenedor = categoria.querySelector(`[data-query="${query}"]`);
+
+        pintarImagenes(query, 1, 1, "landscape", contenedor);
+    });
+};
+
+// 8. Función para bajar hasta la galería
 const bajarAGaleria = () => {
     document.querySelector("#seccionFotografias").scrollIntoView({
         behavior: "smooth",
@@ -250,87 +327,5 @@ const bajarAGaleria = () => {
     });
 };
 
-
-///////////////////
-//FUNCIONES DE LOCAL STORAGE
-////////////////////
-
-const leerLocalStorage = () => {
-    const leerFavorito =
-        JSON.parse(localStorage.getItem("favoritosFotos")) || [];
-    // console.log("favo ", leerFavorito);
-    return leerFavorito;
-};
-
-let favoritos = leerLocalStorage();
-
-const guardarLocalStorage = (favoritos) => {
-    // la lista que entrara en el input y cambiarla con strinfy a texto
-    const datosFavorito = JSON.stringify(favoritos); // convirrtiendo a texto
-    localStorage.setItem("favoritosFotos", datosFavorito); //guardando en el localstorage con setitem , abre el cajón 'favoritosFotos' (key) y mete el texto dentro
-
-    console.log("favv", favoritos);
-};
-
-///////////////////////////////
-// FUNCION GUARADAR FAVORITOS Y PINTAR
-////////////////////////////////
-
-const buscarFavorito = (idImagen) => {
-    return favoritos.find(({ id }) => id === idImagen);
-};
-
-const aniadirFavorito = (ObjetoImagen) => {
-    console.log(typeof ObjetoImagen);
-    const favoritoEncontrado = buscarFavorito(ObjetoImagen.id);
-    if (!favoritoEncontrado) {
-        const nuevaImagen = {
-            id: ObjetoImagen.id,
-            src: ObjetoImagen.src,
-            alt: ObjetoImagen.alt,
-            titulo: ObjetoImagen.title,
-        };
-        favoritos.push(nuevaImagen);
-
-        // console.log(nuevaImagen);
-    } else {
-        console.log("<p>La imagen ya existe</p>");
-        // return;
-    }
-    guardarLocalStorage(favoritos);
-};
-
-const pintarFavoritos = () => {
-    // console.log("pintando");
-    contenedor.innerHTML = ""; // vaciar el contenedor
-    // Creamos un fragmento
-    const fragmento = document.createDocumentFragment();
-    if (favoritos.length === 0) {
-        contenedor.innerHTML =
-            "<p>No has seleccionado una imagen favorita.</p>";
-        return;
-    } else {
-        // Recorremos los favoritos
-        favoritos.forEach((imagen) => {
-            // Creamos cada imagen reutilizando nuestra función
-            const elementoImagen = crearFavorito(imagen);
-            fragmento.append(elementoImagen);
-        });
-        // Añadimos todas las imágenes al contenedor
-        contenedor.append(fragmento);
-    }
-};
-
-const crearFavorito = (imagen) => {
-    const cajaFavorito = document.createElement("article");
-    const titulofavorito = document.createElement("h4");
-    titulofavorito.textContent = imagen.titulo;
-    const img = document.createElement("img");
-    img.src = imagen.src;
-    img.alt = imagen.alt;
-    cajaFavorito.append(titulofavorito, img);
-    return cajaFavorito;
-};
-
+// INICIO DE LA APLICACIÓN
 mostrarCategorias();
-pintarFavoritos();

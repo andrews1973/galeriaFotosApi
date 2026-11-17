@@ -345,20 +345,171 @@ header h1 {
 
 .modalFavoritos {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
-    width: 100%;
-    height: 100%;
-    padding: 1rem;
+    width: 95%;
+    max-width: 1100px;
+    max-height: 85vh;
+    overflow-y: auto;
 
-    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem 1rem;
 
-    z-index: 1000;
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+
+    z-index: 99999;
 }
+
+/* Ocultar modal */
 
 .ocultar {
     display: none;
+}
+
+/* Título del modal */
+
+.modalFavoritos h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    color: #212121;
+}
+
+/* Botón cerrar */
+
+#cerrarFavoritos {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.5rem;
+    height: 2.5rem;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: #f1f1f1;
+    color: #333;
+
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+#cerrarFavoritos:hover {
+    background-color: #e63946;
+    color: #fff;
+}
+
+/* ========================================
+   7.1. GALERÍA DE FAVORITOS
+======================================== */
+
+#listaFavoritos {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    margin-top: 1rem;
+}
+
+/* Tarjetas de favoritos */
+
+#listaFavoritos article {
+    position: relative;
+    overflow: hidden;
+
+    background-color: #fff;
+    border-radius: 0.75rem;
+
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+/* Imágenes de favoritos */
+
+#listaFavoritos article img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+
+    object-fit: cover;
+
+    transition: transform 0.4s ease;
+}
+
+/* Título sobre la imagen */
+
+#listaFavoritos article h4 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    padding: 1rem;
+
+    color: #fff;
+    font-size: 1rem;
+
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+
+    z-index: 1;
+}
+
+/* Botón de favoritos */
+
+#listaFavoritos article .botonFavorito {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2.5rem;
+    height: 2.5rem;
+
+    color: #ff4d5a;
+    background-color: rgba(0, 0, 0, 0.6);
+
+    border: none;
+    border-radius: 50%;
+
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    transition:
+        background-color 0.3s ease,
+        transform 0.3s ease;
+}
+
+#listaFavoritos article .botonFavorito:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+    transform: scale(1.1);
+}
+
+/* Mensaje cuando no hay favoritos */
+
+#listaFavoritos:has(> :only-child:not(article)) {
+    display: block;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #666;
 }
 
 /* ========================================
@@ -460,6 +611,18 @@ footer p {
     #gridFotosCategoria {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    /* Modal de favoritos */
+
+    .modalFavoritos {
+        padding: 2.5rem;
+    }
+
+    /* Dos columnas de favoritos */
+
+    #listaFavoritos {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ========================================
@@ -482,6 +645,11 @@ footer p {
     /* Cuatro columnas de fotografías */
 
     #gridFotosCategoria {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    /* Cuatro columnas de favoritos */
+
+    #listaFavoritos {
         grid-template-columns: repeat(4, 1fr);
     }
 }
