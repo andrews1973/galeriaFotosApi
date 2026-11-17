@@ -35,11 +35,14 @@
             <label for="orientacionFoto">Filtro por orientación</label>
 
             <select name="orientacionFoto" id="orientacionFoto">
-                <option value="" selected disabled>Selecciona una opción</option>
+                <option value="" selected>Todas</option>
                 <option value="squarish">Cuadradas</option>
                 <option value="portrait">Verticales</option>
                 <option value="landscape">Horizontales</option>
             </select>
+
+            <!-- Aviso del buscador cuando el texto no pasa la expresión regular -->
+            <p id="mensajeBusqueda" class="mensajeBusqueda"></p>
 
         </section>
 
@@ -63,17 +66,18 @@
 
             </div>
 
-        <div id="paginacionUnsplash">
-            <button type="button" id="paginaAnterior">Anterior</button>
-            <span id="numeroPagina"></span>
-            <button type="button" id="paginaSiguiente">Siguiente</button>
-        </div>
+            <!-- Paginación: los botones y, entre ellos, el tema y la página que se ven -->
+            <div id="paginacionUnsplash">
+                <button type="button" id="paginaAnterior">Anterior</button>
+                <span id="numeroPagina"></span>
+                <button type="button" id="paginaSiguiente">Siguiente</button>
+            </div>
 
         </section>
 
         <section id="modalFavoritos" class="modalFavoritos ocultar">
 
-            <button id="cerrarFavoritos" type="button">
+            <button id="cerrarFavoritos" type="button" aria-label="Cerrar favoritos">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
