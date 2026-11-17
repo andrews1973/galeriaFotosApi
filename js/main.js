@@ -52,9 +52,27 @@ const categorias = ["nature", "technology", "people"];
 let queryActual = "nature";    // Tema que se está viendo, para que Siguiente y Anterior lo sepan
 let paginaActual = 1;          // Página en la que vamos; toda búsqueda empieza en la 1
 let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
+let totalPaginas = 0;          // Páginas que tiene la búsqueda actual (lo dice Unsplash); 0 = aún no se ha buscado nada
 
-// Recuperamos los favoritos guardados en LocalStorage; si no hay nada, empezamos con la lista vacía
-let favoritos = JSON.parse(localStorage.getItem(CLAVE_FAVORITOS)) || [];
+/**
+ * Lee la lista de favoritos del LocalStorage sin romper la app si lo guardado no es válido.
+ * Live Server y GitHub Pages comparten el LocalStorage con otros proyectos del mismo origen,
+ * así que la clave puede traer algo que no sea nuestra lista.
+ * @returns {Array<Object>} La lista de favoritos guardada, o una lista vacía.
+ */
+const leerFavoritos = () => {
+    try {
+        const guardados = JSON.parse(localStorage.getItem(CLAVE_FAVORITOS));
+        // Solo nos vale una lista de fotos con id y urls; cualquier otra cosa cuenta como vacía
+        return Array.isArray(guardados) ? guardados.filter((foto) => foto && foto.id && foto.urls) : [];
+    } catch (error) {
+        console.error("Los favoritos guardados no son válidos:", error.message);
+        return [];
+    }
+};
+
+// Recuperamos los favoritos guardados en LocalStorage
+let favoritos = leerFavoritos();
 
 ////////////////////////////////
 // PAGINACIÓN Y BÚSQUEDA
@@ -84,6 +102,7 @@ const nuevaBusqueda = async (tema) => {
     paginaActual = 1;           // toda búsqueda nueva empieza en la página 1
     orientacionActual = "";     // y sin filtro de orientación: salen todas
     select.value = "";          // el select vuelve a «Todas»
+    mensajeBusqueda.textContent = "";   // y se borra el aviso del buscador si lo había
     // La galería vuelve a su aspecto de partida (el del index.html), para que no se quede en vertical o cuadrada
     gridFotosCategoria.classList.remove("orientacion-vertical", "orientacion-cuadrada");
     gridFotosCategoria.classList.add("orientacion-horizontal");
@@ -147,9 +166,13 @@ select.addEventListener("change", async () => {
 
 // Siguiente: pasamos de página y pedimos las fotos del mismo tema y orientación
 pagSiguiente.addEventListener("click", async () => {
+    // Si todavía no se ha buscado nada o ya estamos en la última página, no hay a dónde ir
+    if (paginaActual >= totalPaginas) return;
+
     paginaActual++;     // sumamos 1 a la página
-    await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
-    mostrarPagina();    // escribimos la página nueva
+    const pintada = await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
+    if (!pintada) paginaActual--;   // si la petición falla, seguimos en la página de antes
+    mostrarPagina();    // escribimos la página en la que estamos
     bajarAGaleria();
 });
 
@@ -157,8 +180,9 @@ pagSiguiente.addEventListener("click", async () => {
 pagAnterior.addEventListener("click", async () => {
     if (paginaActual > 1) {
         paginaActual--;     // restamos 1 a la página
-        await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
-        mostrarPagina();    // escribimos la página nueva
+        const pintada = await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
+        if (!pintada) paginaActual++;   // si la petición falla, seguimos en la página de antes
+        mostrarPagina();    // escribimos la página en la que estamos
         bajarAGaleria();
     }
 });
@@ -267,7 +291,8 @@ const consultarApi = async (url) => {
  * @param {number} [per_page=FOTOS_POR_PAGINA] - Cuántas fotos se piden.
  * @param {string} [orientacion=""] - "landscape", "portrait", "squarish" o "" (todas).
  * @param {HTMLElement} [zona=gridFotosCategoria] - Dónde se pintan: la galería o la portada de una categoría.
- * @returns {Promise<void>} Termina cuando las fotos (o el aviso de error) ya están en la página.
+ * En la galería, además, apunta en totalPaginas cuántas páginas tiene la búsqueda (para el tope de Siguiente).
+ * @returns {Promise<boolean>} true si la API ha respondido bien; false si ha habido un error.
  * @example
  * pintarImagenes("gatos", 2, 16, "portrait"); // página 2 de gatos en vertical, en la galería
  */
@@ -296,13 +321,18 @@ const pintarImagenes = async (
         // Pedimos a la API la dirección ya montada y esperamos los datos
         const datosRecibidos = await consultarApi(urlBusqueda);
 
+        // En la galería apuntamos cuántas páginas tiene esta búsqueda, para que Siguiente sepa dónde parar
+        if (zona === gridFotosCategoria) {
+            totalPaginas = datosRecibidos.total_pages;
+        }
+
         // Obtenemos el array de fotografías
         const fotos = datosRecibidos.results;
 
         // Comprobamos que existen fotografías
         if (fotos.length === 0) {
             zona.innerHTML = "<p>No se encontraron fotografías.</p>";
-            return;
+            return true;
         }
 
         // Limpiamos las fotografías anteriores
@@ -316,12 +346,14 @@ const pintarImagenes = async (
 
         // Añadimos todas las tarjetas al DOM de una vez
         zona.append(fragment);
+        return true;
     } catch (error) {
         console.error("Error al pintar las imágenes:", error.message);
 
         if (zona) {
             zona.innerHTML = "<p>Ha ocurrido un error al cargar las fotografías.</p>";
         }
+        return false;
     }
 };
 
