@@ -1,19 +1,11 @@
-/**
- * Galería de Fotos API · Team Hero (Lizeth, Andrés y Óscar)
- * Web app que pide fotos a la API de Unsplash con fetch: tres colecciones de inicio,
- * buscador validado con expresión regular, filtro por orientación, paginación
- * y favoritos guardados en el LocalStorage del navegador.
- */
-
-////////////////////////////////
-// ELEMENTOS DEL HTML
-////////////////////////////////
-
+// querySelector
 const select = document.querySelector("#orientacionFoto");
 const categoria = document.querySelector("#categoria");
 const gridFotosCategoria = document.querySelector("#gridFotosCategoria");
 const formulario = document.querySelector("#busqueda");
 const inputBuscar = document.querySelector("#buscar");
+// Párrafo debajo del buscador donde avisamos si lo escrito no vale
+const mensajeBusqueda = document.querySelector("#mensajeBusqueda");
 const modalFavoritos = document.querySelector("#modalFavoritos");
 const listaFavoritos = document.querySelector("#listaFavoritos");
 // Botones de la paginación (debajo de la galería)
@@ -21,62 +13,25 @@ const pagAnterior = document.querySelector("#paginaAnterior");
 const pagSiguiente = document.querySelector("#paginaSiguiente");
 // Hueco entre los dos botones donde escribimos el tema y la página en la que estamos
 const numeroPagina = document.querySelector("#numeroPagina");
-// Párrafo donde avisamos si el texto del buscador no es válido
-const mensajeBusqueda = document.querySelector("#mensajeBusqueda");
 
-// Fragmento para preparar las tarjetas y añadirlas al DOM de una sola vez
+// Creamos un fragmento para almacenar los elementos
 const fragment = document.createDocumentFragment();
-
-////////////////////////////////
-// CONSTANTES Y ESTADO
-////////////////////////////////
 
 // URL base de la API
 const baseUrl = "https://api.unsplash.com/";
 
-// Clave pública de la app en Unsplash (va en la cabecera Authorization de cada petición)
-const CLAVE_UNSPLASH = "mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k";
-
-// Fotos que pedimos en cada página de la galería
-const FOTOS_POR_PAGINA = 16;
-
-// Clave del LocalStorage donde guardamos la lista de favoritos
-const CLAVE_FAVORITOS = "favoritos";
-
-// Lo que admite el buscador: letras (también con tilde y ñ), números y espacios, de 2 a 30 caracteres.
-// Así no se manda a la API un texto vacío ni símbolos raros.
-const REGEX_BUSQUEDA = /^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ0-9\s]{2,30}$/;
+let queryActual = "nature"; // Search term, para guardar la busqueda
+let paginaActual = 1;          // Página en la que vamos; toda búsqueda empieza en la 1
+let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
+let totalPaginas = 0;          // Páginas que tiene la búsqueda (nos lo dice Unsplash en total_pages)
 
 const categorias = ["nature", "technology", "people"];
 
-let queryActual = "nature";    // Tema que se está viendo, para que Siguiente y Anterior lo sepan
-let paginaActual = 1;          // Página en la que vamos; toda búsqueda empieza en la 1
-let orientacionActual = "";    // Orientación elegida en el select; "" = sin filtro (todas)
-let totalPaginas = 0;          // Páginas que tiene la búsqueda actual (lo dice Unsplash); 0 = aún no se ha buscado nada
-
-/**
- * Lee la lista de favoritos del LocalStorage sin romper la app si lo guardado no es válido.
- * Live Server y GitHub Pages comparten el LocalStorage con otros proyectos del mismo origen,
- * así que la clave puede traer algo que no sea nuestra lista.
- * @returns {Array<Object>} La lista de favoritos guardada, o una lista vacía.
- */
-const leerFavoritos = () => {
-    try {
-        const guardados = JSON.parse(localStorage.getItem(CLAVE_FAVORITOS));
-        // Solo nos vale una lista de fotos con id y urls; cualquier otra cosa cuenta como vacía
-        return Array.isArray(guardados) ? guardados.filter((foto) => foto && foto.id && foto.urls) : [];
-    } catch (error) {
-        console.error("Los favoritos guardados no son válidos:", error.message);
-        return [];
-    }
-};
+// Expresión regular del buscador: solo letras (con tilde y ñ), números y espacios, de 2 a 30
+const regexBusqueda = /^[a-zA-ZáéíóúñÁÉÍÓÚÑ0-9 ]{2,30}$/;
 
 // Recuperamos los favoritos guardados en LocalStorage
-let favoritos = leerFavoritos();
-
-////////////////////////////////
-// PAGINACIÓN Y BÚSQUEDA
-////////////////////////////////
+let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
 /**
  * Escribe entre los botones Anterior y Siguiente el tema y la página que se están viendo.
@@ -93,7 +48,6 @@ const mostrarPagina = () => {
  * Empieza una búsqueda desde cero (lo pidió Héctor): tema nuevo, página 1 y sin filtro de orientación.
  * La usan el buscador y las tres categorías de arriba.
  * @param {string} tema - Palabra que se busca en Unsplash (por ejemplo "nature" o lo escrito en el buscador).
- * @returns {Promise<void>} Termina cuando la galería ya está pintada.
  * @example
  * nuevaBusqueda("technology"); // galería de tecnología, página 1, todas las orientaciones
  */
@@ -101,37 +55,33 @@ const nuevaBusqueda = async (tema) => {
     queryActual = tema;         // apuntamos el tema nuevo para que Siguiente y Anterior lo sepan
     paginaActual = 1;           // toda búsqueda nueva empieza en la página 1
     orientacionActual = "";     // y sin filtro de orientación: salen todas
-    select.value = "";          // el select vuelve a «Todas»
-    mensajeBusqueda.textContent = "";   // y se borra el aviso del buscador si lo había
+    select.value = "";      // el select vuelve a «Todas»
     // La galería vuelve a su aspecto de partida (el del index.html), para que no se quede en vertical o cuadrada
     gridFotosCategoria.classList.remove("orientacion-vertical", "orientacion-cuadrada");
     gridFotosCategoria.classList.add("orientacion-horizontal");
-    // Pedimos las fotos a la API y bajamos la pantalla hasta la galería
-    await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
+    // Pedimos las 16 fotos a la API y bajamos la pantalla hasta la galería
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
     mostrarPagina();            // escribimos el tema nuevo y la página 1
     bajarAGaleria();
 };
 
-////////////////////////////////
-// EVENTOS
-////////////////////////////////
 
-// Buscador: validamos el texto con la expresión regular y, si es correcto, empezamos una búsqueda nueva
+// EVENTOS
+
 formulario.addEventListener("submit", async (event) => {
     // Evitamos que el formulario recargue la página
     event.preventDefault();
 
-    // Obtenemos el valor del input, sin espacios al principio ni al final
+    // Obtenemos el valor del input
     const textoBuscar = inputBuscar.value.trim();
 
-    // Validamos antes de pedir nada a la API
-    if (!REGEX_BUSQUEDA.test(textoBuscar)) {
+    // Comprobamos con la expresión regular que lo escrito vale antes de pedir nada a la API
+    if (!regexBusqueda.test(textoBuscar)) {
         mensajeBusqueda.textContent = "Escribe de 2 a 30 letras o números, sin símbolos.";
         return;
     }
 
-    // Texto válido: borramos el aviso y empezamos la búsqueda nueva
-    mensajeBusqueda.textContent = "";
+    mensajeBusqueda.textContent = "";   // si vale, borramos el aviso
     await nuevaBusqueda(textoBuscar);
 });
 
@@ -141,7 +91,7 @@ select.addEventListener("change", async () => {
     orientacionActual = orientacion;   // lo apuntamos para que Siguiente y Anterior lo sepan
     paginaActual = 1;                  // otra orientación = otro montón de fotos: se empieza por la 1
 
-    // Reseteamos las clases de la galería
+    // Quitamos las clases anteriores
     gridFotosCategoria.classList.remove(
         "orientacion-horizontal",
         "orientacion-vertical",
@@ -149,55 +99,56 @@ select.addEventListener("change", async () => {
     );
 
     // Añadimos la clase correspondiente
-    if (orientacion === "portrait") {
+    if (orientacion === "landscape") {
+        gridFotosCategoria.classList.add("orientacion-horizontal");
+    } else if (orientacion === "portrait") {
         gridFotosCategoria.classList.add("orientacion-vertical");
     } else if (orientacion === "squarish") {
         gridFotosCategoria.classList.add("orientacion-cuadrada");
     } else {
-        // "landscape" o "" (Todas): el aspecto de partida, para que la galería nunca se quede sin clase
+        // «Todas»: la galería vuelve a su aspecto de partida
         gridFotosCategoria.classList.add("orientacion-horizontal");
     }
 
-    // Volvemos a consultar las fotografías y esperamos a que se pinten
-    await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
+    // Volvemos a consultar las fotografías
+    await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
     mostrarPagina();    // mismo tema, pero vuelve a la página 1
+
     bajarAGaleria();
 });
 
 // Siguiente: pasamos de página y pedimos las fotos del mismo tema y orientación
 pagSiguiente.addEventListener("click", async () => {
-    // Si todavía no se ha buscado nada o ya estamos en la última página, no hay a dónde ir
-    if (paginaActual >= totalPaginas) return;
-
-    paginaActual++;     // sumamos 1 a la página
-    const pintada = await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
-    if (!pintada) paginaActual--;   // si la petición falla, seguimos en la página de antes
-    mostrarPagina();    // escribimos la página en la que estamos
-    bajarAGaleria();
+    // si ya estamos en la última página (o no se ha buscado nada), no hace nada
+    if (paginaActual < totalPaginas) {
+        paginaActual++;     // sumamos 1 a la página
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+        mostrarPagina();    // escribimos la página nueva
+        bajarAGaleria();
+    }
 });
 
 // Anterior: igual, pero restando; la página 0 no existe, así que en la 1 no hace nada
 pagAnterior.addEventListener("click", async () => {
     if (paginaActual > 1) {
         paginaActual--;     // restamos 1 a la página
-        const pintada = await pintarImagenes(queryActual, paginaActual, FOTOS_POR_PAGINA, orientacionActual);
-        if (!pintada) paginaActual++;   // si la petición falla, seguimos en la página de antes
-        mostrarPagina();    // escribimos la página en la que estamos
+        await pintarImagenes(queryActual, paginaActual, 16, orientacionActual);
+        mostrarPagina();    // escribimos la página nueva
         bajarAGaleria();
     }
 });
 
-// Delegación de eventos: un solo escuchador para las categorías, la ventana de favoritos y los corazones.
-// Es async porque al pulsar una categoría esperamos (await) a que se pinte la galería.
 document.addEventListener("click", async (ev) => {
-    // Seleccionar una categoría: closest() comprueba el elemento pulsado y después sus padres
+    // delegacion de eventos
+    // closest() comprueba el elemento pulsado y después sus padres
+    // Busca hacia elementos padres la imagen hasta encontrar el primer elemento que coincida con #categoria > div
     const categoriaDiv = ev.target.closest("#categoria > div");
 
     if (categoriaDiv) {
         await nuevaBusqueda(categoriaDiv.dataset.query);
     }
 
-    // Mostrar favoritos: pintamos la lista actualizada y abrimos la ventana
+    // Mostrar favoritos
     const botonMostrarFavoritos = ev.target.closest("#mostrarFavoritos");
 
     if (botonMostrarFavoritos) {
@@ -212,15 +163,19 @@ document.addEventListener("click", async (ev) => {
         modalFavoritos.classList.add("ocultar");
     }
 
-    // Añadir o eliminar un favorito: buscamos el botón del corazón desde el elemento donde se ha hecho clic
+    // Añadir o eliminar un favorito,
+    // estamos buscando el botón de favoritos desde el elemento donde se ha producido el clic
     const botonFavorito = ev.target.closest(".botonFavorito");
 
     if (botonFavorito) {
-        // Buscamos hacia arriba el article que tiene ese botón y su imagen
+        // Busca hacia arriba en el HTML
+        // Buscamos el article que tenga ese botón
         const tarjeta = botonFavorito.closest("article");
+
+        // Recuperamos la imagen que contiene el article
         const img = tarjeta.querySelector("img");
 
-        // Recuperamos los datos de la imagen desde el propio img (con la misma forma que los de Unsplash)
+        // Recuperamos los datos de la imagen desde el propio img
         const imagen = {
             id: img.dataset.id,
             urls: {
@@ -235,156 +190,133 @@ document.addEventListener("click", async (ev) => {
         // Comprobamos si ahora es favorita
         const esFavorita = buscarEnFavoritos(imagen);
 
-        // Actualizamos los corazones de todas las tarjetas con esa imagen,
-        // en lugar de volver a pintar toda la galería
+        // Actualizamos los corazones de todas las tarjetas que contengan esa imagen,
+        // en lugar de volver a pintar toda la galería pintarImagenes(queryActual);
         actualizarCorazones(imagen.id, esFavorita);
 
-        // Si el clic ha sido dentro de la ventana de favoritos, la volvemos a pintar
+        // Si estamos dentro de la lista de favoritos, la volvemos a pintar pero funcion pintarFavoritos
         if (listaFavoritos.contains(tarjeta)) {
             pintarFavoritos();
         }
     }
 });
 
-////////////////////////////////
-// API DE UNSPLASH
-////////////////////////////////
-
 /**
- * Pide datos a la API de Unsplash con fetch y los devuelve ya convertidos de JSON.
- * @param {string} url - Dirección completa de la petición (con tema, página, fotos por página y orientación).
- * @returns {Promise<Object>} Los datos de la respuesta.
- * @throws {Error} Si la respuesta no es correcta (sin conexión, clave incorrecta, error del servidor).
- * @example
- * const datos = await consultarApi(`${baseUrl}search/photos?query=nature&page=1&per_page=16`);
- * datos.results; // array con las fotos
+ * 1. Función para consultar la API
+ * @param {string} url - La dirección de la petición.
+ * @returns {Promise<Object>} Los datos que devuelve la API.
  */
 const consultarApi = async (url) => {
     try {
         const respuesta = await fetch(url, {
             method: "GET",
             headers: {
-                Authorization: `Client-ID ${CLAVE_UNSPLASH}`,
+                Authorization:
+                    "Client-ID mn0ZeYNymUf55hXfBfPBIaTYcK8G34hvT8r3gnzYa-k",
             },
         });
 
-        // Comprobamos si la respuesta es correcta
         if (!respuesta.ok) {
             throw new Error(`Error HTTP: ${respuesta.status}`);
         }
 
-        // Convertimos la respuesta a JSON
         const datos = await respuesta.json();
         return datos;
     } catch (error) {
-        console.error("Error al consultar la API:", error.message);
-        // Lo relanzamos para que quien llama (pintarImagenes) avise en la página
+        console.error("Ha ocurrido un error:", error);
         throw error;
     }
 };
 
 /**
- * Pide las fotos de un tema a Unsplash y las pinta en una zona de la página.
- * La orientación solo se añade a la dirección si hay una elegida: "" significa todas.
- * @param {string} [query="nature"] - Tema o palabra que se busca.
- * @param {number} [page=1] - Página de resultados que se pide.
- * @param {number} [per_page=FOTOS_POR_PAGINA] - Cuántas fotos se piden.
- * @param {string} [orientacion=""] - "landscape", "portrait", "squarish" o "" (todas).
- * @param {HTMLElement} [zona=gridFotosCategoria] - Dónde se pintan: la galería o la portada de una categoría.
- * En la galería, además, apunta en totalPaginas cuántas páginas tiene la búsqueda (para el tope de Siguiente).
- * @returns {Promise<boolean>} true si la API ha respondido bien; false si ha habido un error.
- * @example
- * pintarImagenes("gatos", 2, 16, "portrait"); // página 2 de gatos en vertical, en la galería
+ * 2. Función para pintar las imágenes
+ * @param {string} query - El tema o la palabra que buscamos.
+ * @param {number} page - La página que pedimos.
+ * @param {number} per_page - Cuántas fotos pedimos.
+ * @param {string} orientacion - "landscape", "portrait", "squarish" o "" (todas).
+ * @param {HTMLElement} zona - Dónde pintamos: la galería o una categoría.
  */
 const pintarImagenes = async (
     query = "nature",
     page = 1,
-    per_page = FOTOS_POR_PAGINA,
+    per_page = 16,
     orientacion = "",               // "" = sin filtro: no se envía orientation y Unsplash devuelve todas
     zona = gridFotosCategoria,
 ) => {
     try {
-        // Comprobamos que existe el contenedor
         if (!zona) {
             throw new Error("No se encontró el contenedor de fotografías.");
         }
 
         // Montamos la dirección con lo que va siempre: tema, página y fotos por página.
-        // encodeURIComponent prepara el texto para ir en la dirección (espacios, tildes, ñ...).
         let urlBusqueda = `${baseUrl}search/photos?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}`;
+        // La orientación NO va aquí: se añade aparte solo si hay una elegida (si no, salen todas).
 
-        // Si hay una orientación elegida, la pegamos al final de la dirección (si no, salen todas)
+        // Si hay una orientación elegida, la pegamos al final de la dirección
         if (orientacion !== "") {
             urlBusqueda += `&orientation=${orientacion}`;
         }
 
         // Pedimos a la API la dirección ya montada y esperamos los datos
-        const datosRecibidos = await consultarApi(urlBusqueda);
+        const datosRecibidos = await consultarApi(
+            urlBusqueda,
+        );
 
-        // En la galería apuntamos cuántas páginas tiene esta búsqueda, para que Siguiente sepa dónde parar
+        if (!datosRecibidos) {
+            throw new Error("No se pudieron cargar las fotografías.");
+        }
+
+        // En la galería apuntamos cuántas páginas hay, para que Siguiente sepa dónde parar
         if (zona === gridFotosCategoria) {
             totalPaginas = datosRecibidos.total_pages;
         }
 
-        // Obtenemos el array de fotografías
         const fotos = datosRecibidos.results;
 
-        // Comprobamos que existen fotografías
         if (fotos.length === 0) {
             zona.innerHTML = "<p>No se encontraron fotografías.</p>";
-            return true;
+            return;
         }
 
-        // Limpiamos las fotografías anteriores
         zona.innerHTML = "";
 
-        // Recorremos el array de fotografías y preparamos cada tarjeta
         fotos.forEach((imagenObj) => {
-            const tarjeta = crearImagen(imagenObj, zona, query);
-            fragment.append(tarjeta);
+            const contenedor = crearImagen(imagenObj, zona, query);
+            fragment.append(contenedor);
         });
 
-        // Añadimos todas las tarjetas al DOM de una vez
         zona.append(fragment);
-        return true;
     } catch (error) {
-        console.error("Error al pintar las imágenes:", error.message);
+        console.error("Error al pintar las imágenes:", error);
 
         if (zona) {
-            zona.innerHTML = "<p>Ha ocurrido un error al cargar las fotografías.</p>";
+            zona.innerHTML =
+                "<p>Ha ocurrido un error al cargar las fotografías.</p>";
         }
-        return false;
     }
 };
 
-////////////////////////////////
-// TARJETAS Y FAVORITOS
-////////////////////////////////
-
 /**
- * Comprueba si una imagen ya está guardada en favoritos.
- * @param {{id: string}} imagen - Cualquier objeto con el id de la foto.
- * @returns {boolean} true si está en favoritos.
+ * funcion que busca si el favorito ya existe, podria ser find()
+ * @param {Object} imagen - La foto, con su id.
+ * @returns {boolean} true si ya es favorita.
  */
 const buscarEnFavoritos = (imagen) => {
     return favoritos.some((foto) => foto.id === imagen.id);
 };
 
 /**
- * Crea la tarjeta (article) de una foto: título, imagen y botón de corazón.
- * En las portadas de las categorías el título es el tema; en la galería y en favoritos, la descripción.
- * El corazón sale lleno y rojo si la foto ya está en favoritos.
- * @param {Object} imagen - Foto con la forma de Unsplash (id, urls.small, alt_description, description).
- * @param {HTMLElement} zona - Dónde se va a pintar, para decidir qué título lleva.
- * @param {string} query - Tema buscado, que se usa como título en las portadas.
- * @returns {HTMLElement} El article listo para añadir a la página.
+ * 3. Función para crear cada tarjeta de imagen
+ * @param {Object} imagen - La foto que nos da Unsplash.
+ * @param {HTMLElement} zona - Dónde se va a pintar.
+ * @param {string} query - El tema, que sale de título en las categorías.
+ * @returns {HTMLElement} El article de la foto.
  */
 const crearImagen = (imagen, zona, query) => {
     const contenedor = document.createElement("article");
 
     const titulo = document.createElement("h4");
 
-    // En la galería y en favoritos, la descripción de la foto; en las portadas, el tema en mayúsculas
     if (zona === gridFotosCategoria || zona === listaFavoritos) {
         titulo.textContent = imagen.alt_description || "Sin título";
     } else {
@@ -396,19 +328,18 @@ const crearImagen = (imagen, zona, query) => {
     img.alt = imagen.alt_description || "Fotografía de Unsplash";
     img.title = imagen.description || imagen.alt_description || "Sin título";
 
-    // Guardamos el id de la imagen directamente en el img, para saber qué foto es al pulsar el corazón
+    // Guardamos los datos de la imagen directamente en el img
     img.dataset.id = imagen.id;
 
     // Creamos el botón de favoritos
     const botonFavorito = document.createElement("button");
     botonFavorito.type = "button";
     botonFavorito.classList.add("botonFavorito");
-    botonFavorito.setAttribute("aria-label", "Añadir o quitar de favoritos");
 
-    // Comprobamos si la imagen ya está guardada como favorita (true o false)
+    // Comprobamos si la imagen ya está guardada como favorita, devulve true o false
     const esFavorita = buscarEnFavoritos(imagen);
 
-    // Icono de corazón de Font Awesome: lleno si es favorita, vacío si no
+    // font awesome el icono corazon nos fijamos en html para crearlo
     const corazon = document.createElement("i");
 
     if (esFavorita) {
@@ -426,36 +357,36 @@ const crearImagen = (imagen, zona, query) => {
 };
 
 /**
- * Añade la foto a favoritos si no estaba, o la quita si ya estaba, y guarda la lista en LocalStorage.
- * @param {{id: string, urls: {small: string}, alt_description: string}} imagen - La foto pulsada.
- * @example
- * alternarFavorito(foto); // 1.er clic: se guarda · 2.º clic: se elimina
+ * 4. Función para alternar un favorito, pinchando en el corazon y voliendo o no a pinchar
+ * @param {Object} imagen - La foto pulsada.
  */
 const alternarFavorito = (imagen) => {
     // Comprobamos si ya existe en favoritos
     const existe = buscarEnFavoritos(imagen);
 
     if (existe) {
-        // Si existe, la eliminamos: filter devuelve una lista nueva sin esa foto
+        // Si existe, lo eliminamos, devuelve un array donde ya no esta ese favorito
         favoritos = favoritos.filter((foto) => foto.id !== imagen.id);
     } else {
-        // Si no existe, la añadimos a la lista
+        // Si no existe, lo añadimos a nuestro array
         favoritos.push(imagen);
     }
 
-    // Guardamos los cambios en LocalStorage (solo guarda texto: convertimos la lista a JSON)
-    localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(favoritos));
+    // Guardamos los cambios en LocalStorage
+    localStorage.setItem("favoritos", JSON.stringify(favoritos));
 };
 
 /**
- * Pone lleno o vacío el corazón de todas las tarjetas que muestran una misma foto.
- * Una foto puede salir a la vez en la galería y en la ventana de favoritos;
- * así la parte visual sigue igual que la lista sin volver a pintar toda la galería.
- * @param {string} id - Id de la foto.
- * @param {boolean} esFavorita - true para el corazón lleno y rojo, false para vacío.
+ * 5. Función para actualizar los corazones
+ * una misma fotografía puede aparecer en distintos sitios:
+ * por ejemplo, en una categoría y también en los resultados de búsqueda.
+ * mantener sincronizada la parte visual con el contenido del array favoritos
+ * evitamos volver a pintar toda la galería cada vez que añadimos o eliminamos un favorito
+ * @param {string} id - El id de la foto.
+ * @param {boolean} esFavorita - true para el corazón lleno.
  */
 const actualizarCorazones = (id, esFavorita) => {
-    // Recorremos todas las tarjetas de la página
+    // Buscamos todas las tarjetas que tengan ese ID
     const tarjetas = document.querySelectorAll("article");
 
     tarjetas.forEach((tarjeta) => {
@@ -473,51 +404,49 @@ const actualizarCorazones = (id, esFavorita) => {
 };
 
 /**
- * Pinta en la ventana «Mis favoritos» todas las fotos guardadas, o un aviso si no hay ninguna.
- * Cada favorito usa la misma tarjeta que la galería, así que se elimina pulsando su corazón.
+ * 6. Función para pintar los favoritos en el modal
  */
 const pintarFavoritos = () => {
     listaFavoritos.innerHTML = "";
 
-    // Si no hay favoritos, avisamos y no hay nada más que pintar
     if (favoritos.length === 0) {
         listaFavoritos.textContent = "Todavía no tienes favoritos.";
         return;
     }
 
     favoritos.forEach((foto) => {
-        const tarjeta = crearImagen(foto, listaFavoritos, "");
-        fragment.append(tarjeta);
+        const contenedor = crearImagen(foto, listaFavoritos, "");
+        fragment.append(contenedor);
     });
 
     listaFavoritos.append(fragment);
 };
 
 /**
- * Pinta las tres colecciones de inicio (una foto horizontal de cada tema).
- * Primero crea los contenedores y después pide una foto para cada uno.
- * Cada portada guarda su tema en data-query para saber qué buscar al pulsarla.
+ * 7. Función para mostrar las categorías
  */
 const mostrarCategorias = () => {
     categorias.forEach((query) => {
-        const contenedorFotoCategoria = document.createElement("div");
-        contenedorFotoCategoria.dataset.query = query;
-        fragment.append(contenedorFotoCategoria);
+        const contendorFotoCategoria = document.createElement("div");
+
+        contendorFotoCategoria.dataset.query = query;
+
+        fragment.append(contendorFotoCategoria);
     });
 
     // Primero añadimos los contenedores al DOM
     categoria.append(fragment);
 
-    // Después cargamos la imagen de cada categoría en su contenedor
+    // Después cargamos las imágenes de cada categoría
     categorias.forEach((query) => {
         const contenedor = categoria.querySelector(`[data-query="${query}"]`);
+
         pintarImagenes(query, 1, 1, "landscape", contenedor);
     });
 };
 
 /**
- * Desplaza la página con suavidad hasta la sección de la galería,
- * para que el usuario vea las fotos nuevas sin tener que bajar.
+ * 8. Función para bajar hasta la galería
  */
 const bajarAGaleria = () => {
     document.querySelector("#seccionFotografias").scrollIntoView({
@@ -526,8 +455,5 @@ const bajarAGaleria = () => {
     });
 };
 
-////////////////////////////////
 // INICIO DE LA APLICACIÓN
-////////////////////////////////
-
 mostrarCategorias();
