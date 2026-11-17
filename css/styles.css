@@ -70,7 +70,21 @@ header h1 {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
-.menuSelectores button {
+/* Aviso del buscador: ocupa su propia línea y no se ve si está vacío */
+
+.mensajeBusqueda {
+    flex-basis: 100%;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #dc2626;
+}
+
+.mensajeBusqueda:empty {
+    display: none;
+}
+
+.menuSelectores button,
+#paginacionUnsplash button {
     padding: 0.8rem 1.2rem;
     font-size: 1rem;
     font-weight: bold;
@@ -85,7 +99,8 @@ header h1 {
     transition: background-color 0.3s ease;
 }
 
-.menuSelectores button:hover {
+.menuSelectores button:hover,
+#paginacionUnsplash button:hover {
     background-color: #1d4ed8;
 }
 
@@ -333,6 +348,26 @@ header h1 {
     color: #ff4d5a;
 }
 
+/* Paginación: Anterior · TEMA · Página N · Siguiente, centrada debajo de la galería */
+
+#paginacionUnsplash {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* En el móvil el tema y la página van arriba, a lo ancho, y los dos botones debajo */
+
+#numeroPagina {
+    flex-basis: 100%;
+    order: -1;
+    text-align: center;
+    font-weight: bold;
+}
+
 /* Ocultamos favoritos en las portadas */
 
 .categoria .botonFavorito {
@@ -532,46 +567,18 @@ footer p {
     font-size: 0.9rem;
 }
 
-/* Popup de favoritos */
-.modalFavoritos {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    min-height: 300px;
-    padding: 2rem;
-    background-color: white;
-    border-radius: 1rem;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-    z-index: 99999;
-}
-
-/* Botón cerrar */
-#cerrarFavoritos {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    border: none;
-    background: transparent;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #333;
-}
-
-#cerrarFavoritos:hover {
-    color: #e63946;
-}
-
-.ocultar {
-    display: none;
-}
-
 /* ========================================
    9. TABLET - 768px
 ======================================== */
 
 @media (min-width: 768px) {
+    /* Desde tablet, todo en una línea: Anterior · TEMA · Página N · Siguiente */
+
+    #numeroPagina {
+        flex-basis: auto;
+        order: 0;
+    }
+
     header h1 {
         font-size: 2.2rem;
     }
